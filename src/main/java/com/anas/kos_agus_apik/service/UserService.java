@@ -9,7 +9,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.bcrypt.BCrypt;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
+
+import java.util.UUID;
 
 @Service
 public class UserService {
@@ -21,7 +24,8 @@ public class UserService {
     private ValidationService validationService;
 
 
-    private CreateUserResponse create(CreateUserRequest request) {
+    @Transactional
+    public CreateUserResponse create(CreateUserRequest request) {
 
         validationService.validate(request);
 
@@ -33,6 +37,7 @@ public class UserService {
         }
 
         User user = new User();
+        user.setId(UUID.randomUUID().toString());
         user.setUsername(request.getUsername());
         user.setPassword(BCrypt.hashpw(
                 request.getPassword(),
@@ -42,9 +47,12 @@ public class UserService {
         user.setNik(request.getNik());
         user.setPhone(request.getPhone());
         user.setEmail(request.getEmail());
+        user.setRoles(request.getRoles());
 
-
-        return CreateUserResponse.builder().build();
+        return CreateUserResponse.builder()
+                .username(user.getUsername())
+                .name(user.getName())
+                .build();
     }
 
 
