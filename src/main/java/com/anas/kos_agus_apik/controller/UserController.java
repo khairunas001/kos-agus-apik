@@ -22,7 +22,7 @@ public class UserController {
             produces = MediaType.APPLICATION_JSON_VALUE,
             consumes = MediaType.APPLICATION_JSON_VALUE
     )
-    private WebResponse<CreateUserResponse> create(@Valid @RequestBody CreateUserRequest request) {
+    private WebResponse<CreateUserResponse> create(@RequestBody CreateUserRequest request) {
         CreateUserResponse createUserResponse = userService.create(request);
 
         return WebResponse.<CreateUserResponse>builder().data(createUserResponse).build();
