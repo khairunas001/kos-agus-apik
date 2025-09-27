@@ -67,4 +67,11 @@ public class ErrorController {
 
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
     }
+
+    // この生活は、どうすれば良いんでしょうか？
+    // 仕事はまだ持ってないのに、うまくになりたいけど、誰も時間を上げないのおおお
+    // ま。。、　明日もいるしい、まだあけらめないよお、　未来は誰もしているなので。
+    // 自分で信じている、あと少しだけ、美しい未来も来る :-)
+
+
 }
