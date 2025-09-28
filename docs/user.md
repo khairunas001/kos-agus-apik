@@ -1,7 +1,11 @@
 ## 🔹 Endpoints
 
 ### 1. Get All Users
-**`GET /users`**
+**`GET /kos-agus/users`**
+
+Request Header :
+
+- X-KOS-AGUS-API-TOKEN : Token (Mandatory)
 
 📄 Response:
 ```json
@@ -20,7 +24,11 @@
 
 ### 2. Get User by ID
 
-**`GET /users/{id}`**
+**`GET /kos-agus/users/{userId}`**
+
+Request Header :
+
+- X-KOS-AGUS-API-TOKEN : Token (Mandatory)
 
 📄 Response:
 ```json
@@ -37,7 +45,7 @@
 
 ### 3. Create User
 
-**`POST /users`**
+**`POST /kos-agus/users/register`**
 
 📥 Request Body:
 ```json
@@ -69,7 +77,11 @@
 
 ### 4. Update User
 
-**`PUT /users/{id}`**
+**`PUT /kos-agus/users/{userId}`**
+
+Request Header :
+
+- X-KOS-AGUS-API-TOKEN : Token (Mandatory)
 
 📥 Request Body:
 
@@ -101,7 +113,11 @@
 
 ### 5. Delete User
 
-**`DELETE /users/{id}`**
+**`DELETE /kos-agus/users/{userId}`**
+
+Request Header :
+
+- X-KOS-AGUS-API-TOKEN : Token (Mandatory)
 
 📄 Response:
 
@@ -115,5 +131,29 @@
 {
   "status": "error",
   "message": "Username already exists"
+}
+```
+
+### 5. Current User
+
+**`DELETE /kos-agus/users/current`**
+
+Request Header :
+
+- X-KOS-AGUS-API-TOKEN : Token (Mandatory)
+
+📄 Response:
+```json
+{
+"message": "User updated successfully",
+"data": {
+    "id": "uuid-2",
+    "username": "jane_doe",
+    "name": "Jane A. Doe",
+    "nik": "9876543210",
+    "phone": "081211223344",
+    "email": "jane_new@example.com",
+    "roles": "admin"
+  }
 }
 ```
