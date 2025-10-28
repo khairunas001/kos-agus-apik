@@ -1,14 +1,16 @@
 package com.anas.kos_agus_apik.controller;
 
+import com.anas.kos_agus_apik.entity.Token;
 import com.anas.kos_agus_apik.entity.User;
 import com.anas.kos_agus_apik.entity.enum_class.Role;
 import com.anas.kos_agus_apik.model.WebResponse;
-import com.anas.kos_agus_apik.model.request.CreateUserRequest;
-import com.anas.kos_agus_apik.model.response.CreateUserResponse;
+import com.anas.kos_agus_apik.model.request.LoginUserRequest;
+import com.anas.kos_agus_apik.model.response.TokenResponse;
 import com.anas.kos_agus_apik.repository.RoomRepository;
 import com.anas.kos_agus_apik.repository.TokenRepository;
 import com.anas.kos_agus_apik.repository.TransactionRepository;
 import com.anas.kos_agus_apik.repository.UserRepository;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
@@ -20,10 +22,11 @@ import org.springframework.http.MediaType;
 import org.springframework.security.crypto.bcrypt.BCrypt;
 import org.springframework.test.web.servlet.MockMvc;
 
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
-
 import static org.springframework.test.web.servlet.MockMvcBuilder.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -31,7 +34,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 
 @SpringBootTest
 @AutoConfigureMockMvc
-class UserControllerTest {
+class AuthControllerTest {
+
 
     @Autowired
     private MockMvc mockMvc;
@@ -60,7 +64,7 @@ class UserControllerTest {
 
         User user = new User();
         user.setId(UUID.randomUUID().toString());
-        user.setUsername("@anas_test");
+        user.setUsername("@Anas_Username");
         user.setPassword(BCrypt.hashpw(
                 "anas_password",
                 BCrypt.gensalt()
@@ -71,63 +75,78 @@ class UserControllerTest {
         user.setEmail("anas@example.com");
         user.setRoles(Role.admin);
         userRepository.save(user);
+
     }
 
     @Test
-    void testBadRequest() throws Exception{
-        CreateUserRequest request = new CreateUserRequest();
-        request.setUsername("");
-        request.setPassword("");
+    void loginFailedUserNotFound() throws Exception {
+        LoginUserRequest request = new LoginUserRequest();
+        request.setUsername("@Anas_Username_salah");
+        request.setPassword("anas_password_salah");
 
-        mockMvc.perform(post("/kos-agus/users/register")
+        mockMvc.perform(post("/api/auth/login")
                                 .accept(MediaType.APPLICATION_JSON)
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(objectMapper.writeValueAsString(request))
         ).andExpectAll(
-                status().isBadRequest()
+                status().isUnauthorized()
         ).andDo(result -> {
-            WebResponse<String> response = objectMapper.readValue(
+            WebResponse<TokenResponse> response = objectMapper.readValue(
                     result.getResponse().getContentAsString(),
                     new TypeReference<>() {
+
                     }
             );
-            assertNotNull(response.getErrors());
-            System.out.println(response.getErrors());
-        });
 
+            assertNotNull(response.getErrors());
+            System.out.println(objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(response.getErrors()));
+        });
     }
 
     @Test
-    void testSuccess() throws Exception{
-        CreateUserRequest request = new CreateUserRequest();
-        request.setUsername("@anas_username_request");
-        request.setPassword(BCrypt.hashpw(
-                "anas_password_request",
-                BCrypt.gensalt()
-        ));
-        request.setName("Anas_name_request");
-        request.setNik("921830918");
-        request.setPhone("1231231");
-        request.setEmail("anas_request@example.cpm");
-        request.setRoles(Role.customers);
+    void loginSuccess() throws Exception {
 
-        mockMvc.perform(post("/kos-agus/users/register")
+        LoginUserRequest request = new LoginUserRequest();
+        request.setUsername("@Anas_Username");
+        request.setPassword("anas_password");
+
+        mockMvc.perform(post("/api/auth/login")
                                 .accept(MediaType.APPLICATION_JSON)
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(objectMapper.writeValueAsString(request))
         ).andExpectAll(
                 status().isOk()
         ).andDo(result -> {
-            WebResponse<CreateUserResponse> response = objectMapper.readValue(
+            WebResponse<TokenResponse> response = objectMapper.readValue(
                     result.getResponse().getContentAsString(),
                     new TypeReference<>() {
+
                     }
             );
+
             assertNull(response.getErrors());
-            assertEquals("@anas_username_request", response.getData().getUsername());
-            assertEquals("Anas_name_request", response.getData().getName());
-            System.out.println(response.getData());
+            assertNotNull(response.getData().getToken());
+            assertNotNull(response.getData().getTokenExpiredAt());
+
+            User userDb = userRepository.findByUsername("@Anas_Username").orElse(null);
+            assertNotNull(userDb);
+
+            // ambil token yang berkaitan dengan user
+            Token tokenDb = tokenRepository.findByUser(userDb).orElse(null);
+            assertNotNull(tokenDb);
+
+            // pastikan nilai sama dengan response
+            assertEquals(response.getData().getToken(), tokenDb.getToken());
+            //            assertEquals(
+            //                    response.getData().getTokenExpiredAt().truncatedTo(ChronoUnit.SECONDS),
+            //                    tokenDb.getTokenExpiredAt().truncatedTo(ChronoUnit.SECONDS)
+            //            );
+            assertTrue(tokenDb.getTokenExpiredAt().isAfter(LocalDateTime.now()));
+
+
+            System.out.println(objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(response.getData()));
         });
+
 
     }
 }

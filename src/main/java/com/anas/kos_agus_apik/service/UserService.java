@@ -48,6 +48,7 @@ public class UserService {
         user.setPhone(request.getPhone());
         user.setEmail(request.getEmail());
         user.setRoles(request.getRoles());
+        userRepository.save(user);
 
         return CreateUserResponse.builder()
                 .username(user.getUsername())

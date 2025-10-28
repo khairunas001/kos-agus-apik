@@ -4,6 +4,7 @@ import com.anas.kos_agus_apik.entity.enum_class.Role;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @NoArgsConstructor
@@ -39,8 +40,9 @@ public class User {
     @Column(columnDefinition = "ENUM('admin','customers')",nullable = false)
     private Role roles;
 
-    @OneToMany(mappedBy = "user")
-    private List<Token> tokens;
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Token> tokens = new ArrayList<>();
+
 
     @OneToMany(mappedBy = "user")
     private List<Room> rooms;
