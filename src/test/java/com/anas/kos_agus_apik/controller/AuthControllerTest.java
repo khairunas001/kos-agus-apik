@@ -84,7 +84,7 @@ class AuthControllerTest {
         request.setUsername("@Anas_Username_salah");
         request.setPassword("anas_password_salah");
 
-        mockMvc.perform(post("/api/auth/login")
+        mockMvc.perform(post("/kos-agus/api/auth/login")
                                 .accept(MediaType.APPLICATION_JSON)
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(objectMapper.writeValueAsString(request))
@@ -110,7 +110,7 @@ class AuthControllerTest {
         request.setUsername("@Anas_Username");
         request.setPassword("anas_password");
 
-        mockMvc.perform(post("/api/auth/login")
+        mockMvc.perform(post("/kos-agus/api/auth/login")
                                 .accept(MediaType.APPLICATION_JSON)
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(objectMapper.writeValueAsString(request))

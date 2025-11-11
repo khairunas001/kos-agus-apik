@@ -14,6 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -39,7 +40,10 @@ public class AuthService {
                         "Username or password is wrong"
                 ));
 
-        if (!BCrypt.checkpw(request.getPassword(), user.getPassword())) {
+        if (!BCrypt.checkpw(
+                request.getPassword(),
+                user.getPassword()
+        )) {
             throw new ResponseStatusException(
                     HttpStatus.UNAUTHORIZED,
                     "Username or password is wrong"
@@ -50,7 +54,7 @@ public class AuthService {
         LocalDateTime expiredAt = next30Days();
 
         // hapus token lama kalau user sudah punya
-        tokenRepository.findByUser(user).ifPresent(tokenRepository::delete);
+        // tokenRepository.findByUser(user).ifPresent(tokenRepository::delete);
 
         // buat token baru dengan id unik
         Token token = new Token();
@@ -68,6 +72,27 @@ public class AuthService {
                 .build();
     }
 
+    @Transactional
+    public void logOut(String tokenValue, User user) {
+        // mencari token yang memiliki nilai userId yang sama dengan id user
+        Token token = tokenRepository.findFirstByTokenAndUser(
+                        tokenValue,
+                        user
+                )
+                .orElseThrow(() -> new IllegalArgumentException("Token not found or already logged out"));
+
+        // menghapus token yang digunakan oleh user
+        tokenRepository.delete(token);
+    }
+
+    @Transactional
+    public void logOutAllAccount(User user) {
+        // mencari token yang memiliki nilai userId yang sama dengan id user
+        List<Token> tokens = tokenRepository.findAllByUser(user);
+
+        // Menghapus semua token user tersebut
+        tokenRepository.deleteAll(tokens);
+    }
 
     // generate 30 days from now
     private LocalDateTime next30Days() {
