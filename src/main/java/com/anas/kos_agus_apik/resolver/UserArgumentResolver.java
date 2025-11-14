@@ -62,6 +62,9 @@ public class UserArgumentResolver implements HandlerMethodArgumentResolver {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "User not found for this token");
         }
 
+        // Simpan token di request agar bisa diambil di controller atau service
+        servletRequest.setAttribute("activeTokenValue", tokenValue);
+
         return user;
     }
 }

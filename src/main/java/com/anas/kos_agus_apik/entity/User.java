@@ -37,14 +37,14 @@ public class User {
     private String email;
 
     @Enumerated(EnumType.STRING)
-    @Column(columnDefinition = "ENUM('admin','customers')",nullable = false)
+    @Column(columnDefinition = "ENUM('admin','customers')", nullable = false)
     private Role roles;
 
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private List<Token> tokens = new ArrayList<>();
 
 
-    @OneToMany(mappedBy = "user")
+    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
     private List<Room> rooms;
 }
 

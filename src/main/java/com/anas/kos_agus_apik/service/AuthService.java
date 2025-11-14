@@ -79,14 +79,14 @@ public class AuthService {
                         tokenValue,
                         user
                 )
-                .orElseThrow(() -> new IllegalArgumentException("Token not found or already logged out"));
+                .orElseThrow(() -> new IllegalArgumentException("Token not found or this device already logged out"));
 
         // menghapus token yang digunakan oleh user
         tokenRepository.delete(token);
     }
 
     @Transactional
-    public void logOutAllAccount(User user) {
+    public void logOutAllDevice(User user) {
         // mencari token yang memiliki nilai userId yang sama dengan id user
         List<Token> tokens = tokenRepository.findAllByUser(user);
 

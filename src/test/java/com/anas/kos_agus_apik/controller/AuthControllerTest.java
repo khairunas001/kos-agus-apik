@@ -136,7 +136,10 @@ class AuthControllerTest {
             assertNotNull(tokenDb);
 
             // pastikan nilai sama dengan response
-            assertEquals(response.getData().getToken(), tokenDb.getToken());
+            assertEquals(
+                    response.getData().getToken(),
+                    tokenDb.getToken()
+            );
             //            assertEquals(
             //                    response.getData().getTokenExpiredAt().truncatedTo(ChronoUnit.SECONDS),
             //                    tokenDb.getTokenExpiredAt().truncatedTo(ChronoUnit.SECONDS)
@@ -147,6 +150,188 @@ class AuthControllerTest {
             System.out.println(objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(response.getData()));
         });
 
+    }
+
+    @Test
+    void logOutFailed() throws Exception {
+
+        mockMvc.perform(delete("/kos-agus/api/auth/logout")
+                                .contentType(MediaType.APPLICATION_JSON)
+        ).andExpectAll(
+                status().isUnauthorized()
+        ).andDo(result -> {
+            WebResponse<TokenResponse> response = objectMapper.readValue(
+                    result.getResponse().getContentAsString(),
+                    new TypeReference<>() {
+
+                    }
+            );
+
+            assertNotNull(response.getErrors());
+            System.out.println(objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(response.getErrors()));
+        });
+
+    }
+
+    @Test
+    void logOutSuccess() throws Exception {
+
+        // --- Setup user unik ---
+        User user = new User();
+        user.setId(UUID.randomUUID().toString());
+        user.setUsername("user_" + UUID.randomUUID().toString().substring(
+                0,
+                8
+        ));
+        user.setPassword(BCrypt.hashpw(
+                "anas_password",
+                BCrypt.gensalt()
+        ));
+        user.setName("Anas Test User");
+        user.setNik(UUID.randomUUID().toString().substring(
+                0,
+                12
+        )); // unik, 12 digit cukup
+        user.setPhone("08" + (long) (Math.random() * 1000000000L)); // random nomor
+        user.setEmail("anas_" + UUID.randomUUID().toString().substring(
+                0,
+                6
+        ) + "@example.com");
+        user.setRoles(Role.admin);
+        userRepository.save(user);
+
+        // --- Setup token ---
+        String newToken = UUID.randomUUID().toString();
+        LocalDateTime expiredAt = LocalDateTime.now().plusHours(2);
+
+        Token token = new Token();
+        token.setId(UUID.randomUUID().toString());
+        token.setUser(user);
+        token.setToken(newToken);
+        token.setTokenExpiredAt(expiredAt);
+        tokenRepository.save(token);
+
+        mockMvc.perform(delete("/kos-agus/api/auth/logout")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .header(
+                                        "API-TOKEN-KOS-AGUS-APIK",
+                                        newToken
+                                )
+        ).andExpectAll(
+                status().isOk()
+        ).andDo(result -> {
+            WebResponse<String> response = objectMapper.readValue(
+                    result.getResponse().getContentAsString(),
+                    new TypeReference<>() {
+                    }
+            );
+
+            assertEquals(
+                    "oke",
+                    response.getData()
+            );
+
+            // pastikan data terhapus
+            assertFalse(tokenRepository.findFirstByToken(newToken).isPresent());
+
+            System.out.println("✅ Logout success test passed for user: " + user.getUsername());
+            System.out.println(objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(response));
+        });
+    }
+
+    @Test
+    void logOutAllDeviceFailed() throws Exception {
+        mockMvc.perform(delete("/kos-agus/api/auth/logout-all-device")
+                                .contentType(MediaType.APPLICATION_JSON)
+        ).andExpectAll(
+                status().isUnauthorized()
+        ).andDo(result -> {
+            WebResponse<TokenResponse> response = objectMapper.readValue(
+                    result.getResponse().getContentAsString(),
+                    new TypeReference<>() {
+
+                    }
+            );
+
+            assertNotNull(response.getErrors());
+            System.out.println(objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(response.getErrors()));
+        });
+
+    }
+
+    @Test
+    void logOutAllDevice() throws Exception {
+
+
+        // --- Setup user unik ---
+        User user = new User();
+        user.setId(UUID.randomUUID().toString());
+        user.setUsername("user_" + UUID.randomUUID().toString().substring(
+                0,
+                8
+        ));
+        user.setPassword(BCrypt.hashpw(
+                "anas_password",
+                BCrypt.gensalt()
+        ));
+        user.setName("Anas Test User");
+        user.setNik(UUID.randomUUID().toString().substring(
+                0,
+                12
+        )); // unik, 12 digit cukup
+        user.setPhone("08" + (long) (Math.random() * 1000000000L)); // random nomor
+        user.setEmail("anas_" + UUID.randomUUID().toString().substring(
+                0,
+                6
+        ) + "@example.com");
+        user.setRoles(Role.admin);
+        userRepository.save(user);
+
+        // --- Setup multiple tokens ---
+        LocalDateTime expiredAt = LocalDateTime.now().plusHours(2);
+        String activeTokenValue = "active_" + UUID.randomUUID();
+
+        for (int i = 0; i < 10; i++) {
+            Token token = new Token();
+            token.setId(i + "_" + UUID.randomUUID().toString());
+            token.setUser(user);
+            token.setToken("token_" + i + "_" + UUID.randomUUID());
+            token.setTokenExpiredAt(expiredAt);
+            tokenRepository.save(token);
+        }
+
+        Token activeToken = new Token();
+        activeToken.setId(UUID.randomUUID().toString());
+        activeToken.setUser(user);
+        activeToken.setToken(activeTokenValue);
+        activeToken.setTokenExpiredAt(expiredAt);
+        tokenRepository.save(activeToken);
+
+        mockMvc.perform(delete("/kos-agus/api/auth/logout-all-device")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .header(
+                                        "API-TOKEN-KOS-AGUS-APIK",
+                                        activeTokenValue
+                                )
+
+        ).andExpectAll(
+                status().isOk()
+        ).andExpectAll(result -> {
+            WebResponse<String> response = objectMapper.readValue(
+                    result.getResponse().getContentAsString(),
+                    new TypeReference<>() {
+                    }
+            );
+
+            assertNull(response.getErrors());
+
+            // pastikan data terhapus
+            assertFalse(tokenRepository.findFirstByToken(activeTokenValue).isPresent());
+
+            System.out.println("✅ Logout all device success test passed for user: " + user.getUsername());
+            System.out.println(objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(response));
+
+        });
 
     }
 }
