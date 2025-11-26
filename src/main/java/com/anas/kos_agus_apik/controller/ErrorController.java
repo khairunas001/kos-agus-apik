@@ -1,6 +1,7 @@
 package com.anas.kos_agus_apik.controller;
 
-import com.anas.kos_agus_apik.model.WebResponse;
+import com.anas.kos_agus_apik.model.web_response.WebResponse;
+import com.anas.kos_agus_apik.model.web_response.WebResponseErrors;
 import jakarta.validation.ConstraintViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -16,13 +17,13 @@ public class ErrorController {
 
     // Handler untuk validasi @Valid di @RequestBody
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<WebResponse<?>> handleMethodArgumentNotValid(MethodArgumentNotValidException exception) {
+    public ResponseEntity<WebResponseErrors<?>> handleMethodArgumentNotValid(MethodArgumentNotValidException exception) {
 
         String errorMessage = exception.getBindingResult().getFieldErrors().stream()
                 .map(err -> err.getField() + " " + err.getDefaultMessage())
                 .collect(Collectors.joining(", "));
 
-        WebResponse<?> response = WebResponse.builder()
+        WebResponseErrors<?> response = WebResponseErrors.builder()
                 .status(HttpStatus.BAD_REQUEST.toString())
                 .errors(errorMessage)
                 .build();
@@ -32,13 +33,13 @@ public class ErrorController {
 
     // Handler untuk validasi @Validated di method level
     @ExceptionHandler(ConstraintViolationException.class)
-    public ResponseEntity<WebResponse<?>> handleConstraintViolation(ConstraintViolationException exception) {
+    public ResponseEntity<WebResponseErrors<?>> handleConstraintViolation(ConstraintViolationException exception) {
 
         String errorMessage = exception.getConstraintViolations().stream()
                 .map(cv -> cv.getPropertyPath() + " " + cv.getMessage())
                 .collect(Collectors.joining(", "));
 
-        WebResponse<?> response = WebResponse.builder()
+        WebResponseErrors<?> response = WebResponseErrors.builder()
                 .status(HttpStatus.BAD_REQUEST.toString())
                 .errors(errorMessage)
                 .build();
@@ -48,8 +49,8 @@ public class ErrorController {
 
     // Handler untuk ResponseStatusException (manual throw)
     @ExceptionHandler(ResponseStatusException.class)
-    public ResponseEntity<WebResponse<?>> handleApiException(ResponseStatusException exception) {
-        WebResponse<?> response = WebResponse.builder()
+    public ResponseEntity<WebResponseErrors<?>> handleApiException(ResponseStatusException exception) {
+        WebResponseErrors<?> response = WebResponseErrors.builder()
                 .status(exception.getStatusCode().toString())
                 .errors(exception.getReason())
                 .build();
@@ -59,8 +60,8 @@ public class ErrorController {
 
     // fallback untuk exception lainnya
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<WebResponse<?>> handleGeneralException(Exception exception) {
-        WebResponse<?> response = WebResponse.builder()
+    public ResponseEntity<WebResponseErrors<?>> handleGeneralException(Exception exception) {
+        WebResponseErrors<?> response = WebResponseErrors.builder()
                 .status(HttpStatus.INTERNAL_SERVER_ERROR.toString())
                 .errors(exception.getMessage())
                 .build();

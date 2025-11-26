@@ -1,10 +1,11 @@
 package com.anas.kos_agus_apik.controller;
 
-import com.anas.kos_agus_apik.model.WebResponse;
+import com.anas.kos_agus_apik.model.ResponseFactory;
+import com.anas.kos_agus_apik.model.web_response.WebResponse;
 import com.anas.kos_agus_apik.model.request.CreateUserRequest;
 import com.anas.kos_agus_apik.model.response.CreateUserResponse;
+import com.anas.kos_agus_apik.model.web_response.WebResponseSuccess;
 import com.anas.kos_agus_apik.service.UserService;
-import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -22,10 +23,10 @@ public class UserController {
             produces = MediaType.APPLICATION_JSON_VALUE,
             consumes = MediaType.APPLICATION_JSON_VALUE
     )
-    private WebResponse<CreateUserResponse> create(@RequestBody CreateUserRequest request) {
+    private WebResponseSuccess<CreateUserResponse> create(@RequestBody CreateUserRequest request) {
         CreateUserResponse createUserResponse = userService.create(request);
 
-        return WebResponse.<CreateUserResponse>builder().data(createUserResponse).build();
+        return ResponseFactory.created(createUserResponse).getBody();
     }
 
 }

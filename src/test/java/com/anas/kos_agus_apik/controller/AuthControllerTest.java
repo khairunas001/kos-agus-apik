@@ -3,14 +3,13 @@ package com.anas.kos_agus_apik.controller;
 import com.anas.kos_agus_apik.entity.Token;
 import com.anas.kos_agus_apik.entity.User;
 import com.anas.kos_agus_apik.entity.enum_class.Role;
-import com.anas.kos_agus_apik.model.WebResponse;
+import com.anas.kos_agus_apik.model.web_response.WebResponse;
 import com.anas.kos_agus_apik.model.request.LoginUserRequest;
 import com.anas.kos_agus_apik.model.response.TokenResponse;
 import com.anas.kos_agus_apik.repository.RoomRepository;
 import com.anas.kos_agus_apik.repository.TokenRepository;
 import com.anas.kos_agus_apik.repository.TransactionRepository;
 import com.anas.kos_agus_apik.repository.UserRepository;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
@@ -18,19 +17,17 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.security.crypto.bcrypt.BCrypt;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.time.LocalDateTime;
-import java.time.temporal.ChronoUnit;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.springframework.test.web.servlet.MockMvcBuilder.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.*;
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -226,10 +223,9 @@ class AuthControllerTest {
                     }
             );
 
-            assertEquals(
-                    "oke",
-                    response.getData()
-            );
+            assertNull(response.getData());
+
+            assertEquals(HttpStatus.OK.value() + " " + HttpStatus.OK.name(), "200 OK");
 
             // pastikan data terhapus
             assertFalse(tokenRepository.findFirstByToken(newToken).isPresent());

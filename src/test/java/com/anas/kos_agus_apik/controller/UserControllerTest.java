@@ -2,7 +2,7 @@ package com.anas.kos_agus_apik.controller;
 
 import com.anas.kos_agus_apik.entity.User;
 import com.anas.kos_agus_apik.entity.enum_class.Role;
-import com.anas.kos_agus_apik.model.WebResponse;
+import com.anas.kos_agus_apik.model.web_response.WebResponse;
 import com.anas.kos_agus_apik.model.request.CreateUserRequest;
 import com.anas.kos_agus_apik.model.response.CreateUserResponse;
 import com.anas.kos_agus_apik.repository.RoomRepository;
@@ -24,10 +24,8 @@ import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-import static org.springframework.test.web.servlet.MockMvcBuilder.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.*;
 
 @SpringBootTest
 @AutoConfigureMockMvc

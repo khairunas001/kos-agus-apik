@@ -1,4 +1,4 @@
-package com.anas.kos_agus_apik.model;
+package com.anas.kos_agus_apik.model.web_response;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -9,12 +9,9 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Data
 @Builder
-public class WebResponse <T>{
+public class WebResponseSuccess<T>{
 
     private String status;
 
     private T data;
-
-    private String errors;
-
 }
