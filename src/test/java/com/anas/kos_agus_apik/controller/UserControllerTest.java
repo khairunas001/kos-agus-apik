@@ -1,7 +1,11 @@
 package com.anas.kos_agus_apik.controller;
 
+import com.anas.kos_agus_apik.entity.Token;
 import com.anas.kos_agus_apik.entity.User;
 import com.anas.kos_agus_apik.entity.enum_class.Role;
+import com.anas.kos_agus_apik.model.request.LoginUserRequest;
+import com.anas.kos_agus_apik.model.response.TokenResponse;
+import com.anas.kos_agus_apik.model.response.UsersResponse;
 import com.anas.kos_agus_apik.model.web_response.WebResponse;
 import com.anas.kos_agus_apik.model.request.CreateUserRequest;
 import com.anas.kos_agus_apik.model.response.CreateUserResponse;
@@ -20,6 +24,7 @@ import org.springframework.http.MediaType;
 import org.springframework.security.crypto.bcrypt.BCrypt;
 import org.springframework.test.web.servlet.MockMvc;
 
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -49,6 +54,8 @@ class UserControllerTest {
     @Autowired
     private ObjectMapper objectMapper;
 
+    private User user;
+
     @BeforeEach
     void setUp() {
         roomRepository.deleteAll();
@@ -69,10 +76,11 @@ class UserControllerTest {
         user.setEmail("anas@example.com");
         user.setRoles(Role.admin);
         userRepository.save(user);
+
     }
 
     @Test
-    void testBadRequest() throws Exception{
+    void testRegisterBadRequest() throws Exception {
         CreateUserRequest request = new CreateUserRequest();
         request.setUsername("");
         request.setPassword("");
@@ -96,7 +104,7 @@ class UserControllerTest {
     }
 
     @Test
-    void testSuccess() throws Exception{
+    void testRegisterSuccess() throws Exception {
         CreateUserRequest request = new CreateUserRequest();
         request.setUsername("@anas_username_request");
         request.setPassword(BCrypt.hashpw(
@@ -122,10 +130,104 @@ class UserControllerTest {
                     }
             );
             assertNull(response.getErrors());
-            assertEquals("@anas_username_request", response.getData().getUsername());
-            assertEquals("Anas_name_request", response.getData().getName());
+            assertEquals(
+                    "@anas_username_request",
+                    response.getData().getUsername()
+            );
+            assertEquals(
+                    "Anas_name_request",
+                    response.getData().getName()
+            );
             System.out.println(response.getData());
         });
 
     }
+
+    @Test
+    void getUsersUnauthorized() throws Exception {
+
+        mockMvc.perform(get("/kos-agus/users/current")
+                                .contentType(MediaType.APPLICATION_JSON)
+        ).andExpectAll(
+                status().isUnauthorized()
+        ).andDo(result -> {
+            WebResponse<UsersResponse> response = objectMapper.readValue(
+                    result.getResponse().getContentAsString(),
+                    new TypeReference<>() {
+
+                    }
+            );
+
+            assertNotNull(response.getErrors());
+            assertEquals(
+                    "401 UNAUTHORIZED",
+                    response.getStatus()
+            );
+            System.out.println(objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(response.getErrors()));
+        });
+    }
+
+    @Test
+    void getUsersSuccess() throws Exception {
+
+        // --- Setup user unik ---
+        User user = new User();
+        user.setId(UUID.randomUUID().toString());
+        user.setUsername("user_" + UUID.randomUUID().toString().substring(
+                0,
+                8
+        ));
+        user.setPassword(BCrypt.hashpw(
+                "anas_password",
+                BCrypt.gensalt()
+        ));
+        user.setName("Anas Test User");
+        user.setNik(UUID.randomUUID().toString().substring(
+                0,
+                12
+        )); // unik, 12 digit cukup
+        user.setPhone("08" + (long) (Math.random() * 1000000000L)); // random nomor
+        user.setEmail("anas_" + UUID.randomUUID().toString().substring(
+                0,
+                6
+        ) + "@example.com");
+        user.setRoles(Role.admin);
+        userRepository.save(user);
+
+        // --- Setup token ---
+        String newToken = UUID.randomUUID().toString();
+        LocalDateTime expiredAt = LocalDateTime.now().plusHours(2);
+
+        Token token = new Token();
+        token.setId(UUID.randomUUID().toString());
+        token.setUser(user);
+        token.setToken(newToken);
+        token.setTokenExpiredAt(expiredAt);
+        tokenRepository.save(token);
+
+        mockMvc.perform(get("/kos-agus/users/current")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .header(
+                                        "API-TOKEN-KOS-AGUS-APIK",
+                                        newToken
+                                )
+        ).andExpectAll(
+                status().isOk()
+        ).andDo(result -> {
+            WebResponse<UsersResponse> response = objectMapper.readValue(
+                    result.getResponse().getContentAsString(),
+                    new TypeReference<>() {
+
+                    }
+            );
+
+            assertNull(response.getErrors());
+            assertEquals(
+                    "OK 200",
+                    response.getStatus()
+            );
+            System.out.println(objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(response.getErrors()));
+        });
+    }
+
 }

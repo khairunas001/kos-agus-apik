@@ -4,6 +4,7 @@ package com.anas.kos_agus_apik.service;
 import com.anas.kos_agus_apik.entity.User;
 import com.anas.kos_agus_apik.model.request.CreateUserRequest;
 import com.anas.kos_agus_apik.model.response.CreateUserResponse;
+import com.anas.kos_agus_apik.model.response.UsersResponse;
 import com.anas.kos_agus_apik.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -12,6 +13,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.security.PublicKey;
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -53,6 +56,36 @@ public class UserService {
         return CreateUserResponse.builder()
                 .username(user.getUsername())
                 .name(user.getName())
+                .build();
+    }
+
+    @Transactional
+    public List<UsersResponse> getAllUsers() {
+
+        return userRepository.findAll()
+                .stream()
+                .map(user -> UsersResponse.builder()
+                        .id(user.getId())
+                        .username(user.getUsername())
+                        .name(user.getName())
+                        .phone(user.getPhone())
+                        .email(user.getEmail())
+                        .roles(user.getRoles())
+                        .build()
+                )
+                .toList();
+    }
+
+    @Transactional
+    public UsersResponse get(User user) {
+
+        return UsersResponse.builder()
+                .id(user.getId())
+                .username(user.getUsername())
+                .name(user.getName())
+                .phone(user.getPhone())
+                .email(user.getEmail())
+                .roles(user.getRoles())
                 .build();
     }
 
