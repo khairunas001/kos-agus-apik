@@ -25,9 +25,9 @@ public class AuthController {
             consumes = MediaType.APPLICATION_JSON_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE
     )
-    public WebResponseSuccess<TokenResponse> login(@RequestBody LoginUserRequest request) {
+    public ResponseEntity<WebResponseSuccess<TokenResponse>> login(@RequestBody LoginUserRequest request) {
         TokenResponse tokenResponse = authService.login(request);
-        return ResponseFactory.ok(tokenResponse).getBody();
+        return ResponseFactory.ok(tokenResponse);
     }
 
     @DeleteMapping(
@@ -43,13 +43,19 @@ public class AuthController {
         return ResponseFactory.ok(null);
     }
 
-    @DeleteMapping(
-            path = "/kos-agus/api/auth/logout-all-device",
-            produces = MediaType.APPLICATION_JSON_VALUE
-    )
-    public WebResponse<String> logOutAllDevice(User user) {
+//    @DeleteMapping(
+//            path = "/kos-agus/api/auth/logout-all-device",
+//            produces = MediaType.APPLICATION_JSON_VALUE
+//    )
+//    public WebResponse<String> logOutAllDevice(User user) {
+//        authService.logOutAllDevice(user);
+//        return WebResponse.<String>builder().status(String.valueOf(HttpStatus.OK.value() + " " + HttpStatus.OK.name())).data("Deleted data success").build();
+//    }
+
+    @DeleteMapping("/kos-agus/api/auth/logout-all-device")
+    public ResponseEntity<WebResponseSuccess<String>> logOutAllDevice(User user) {
         authService.logOutAllDevice(user);
-        return WebResponse.<String>builder().status(String.valueOf(HttpStatus.OK.value() + " " + HttpStatus.OK.name())).data("Deleted data success").build();
+        return ResponseFactory.ok("Deleted data success");
     }
 
 }

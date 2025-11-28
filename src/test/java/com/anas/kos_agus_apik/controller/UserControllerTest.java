@@ -4,6 +4,7 @@ import com.anas.kos_agus_apik.entity.Token;
 import com.anas.kos_agus_apik.entity.User;
 import com.anas.kos_agus_apik.entity.enum_class.Role;
 import com.anas.kos_agus_apik.model.request.LoginUserRequest;
+import com.anas.kos_agus_apik.model.request.UsersUpdateRequest;
 import com.anas.kos_agus_apik.model.response.TokenResponse;
 import com.anas.kos_agus_apik.model.response.UsersResponse;
 import com.anas.kos_agus_apik.model.web_response.WebResponse;
@@ -25,6 +26,7 @@ import org.springframework.security.crypto.bcrypt.BCrypt;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -122,7 +124,7 @@ class UserControllerTest {
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(objectMapper.writeValueAsString(request))
         ).andExpectAll(
-                status().isOk()
+                status().isCreated()
         ).andDo(result -> {
             WebResponse<CreateUserResponse> response = objectMapper.readValue(
                     result.getResponse().getContentAsString(),
@@ -229,5 +231,116 @@ class UserControllerTest {
             System.out.println(objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(response.getErrors()));
         });
     }
+
+    @Test
+    void getAllUsersUnauthorized() throws Exception {
+
+        mockMvc.perform(get("/kos-agus/users")
+                                .contentType(MediaType.APPLICATION_JSON)
+        ).andExpectAll(
+                status().isUnauthorized()
+        ).andDo(result -> {
+            WebResponse<UsersResponse> response = objectMapper.readValue(
+                    result.getResponse().getContentAsString(),
+                    new TypeReference<>() {
+
+                    }
+            );
+
+            assertNotNull(response.getErrors());
+            assertEquals(
+                    "401 UNAUTHORIZED",
+                    response.getStatus()
+            );
+            System.out.println(objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(response.getErrors()));
+        });
+    }
+
+    @Test
+    void getAllUsersSuccess() throws Exception {
+
+        // --- Setup user unik ---
+        User user = new User();
+        user.setId(UUID.randomUUID().toString());
+        user.setUsername("user_" + UUID.randomUUID().toString().substring(
+                0,
+                8
+        ));
+        user.setPassword(BCrypt.hashpw(
+                "anas_password",
+                BCrypt.gensalt()
+        ));
+        user.setName("Anas Test User");
+        user.setNik(UUID.randomUUID().toString().substring(
+                0,
+                12
+        )); // unik, 12 digit cukup
+        user.setPhone("08" + (long) (Math.random() * 1000000000L)); // random nomor
+        user.setEmail("anas_" + UUID.randomUUID().toString().substring(
+                0,
+                6
+        ) + "@example.com");
+        user.setRoles(Role.admin);
+        userRepository.save(user);
+
+        // --- Setup token ---
+        String newToken = UUID.randomUUID().toString();
+        LocalDateTime expiredAt = LocalDateTime.now().plusHours(2);
+
+        Token token = new Token();
+        token.setId(UUID.randomUUID().toString());
+        token.setUser(user);
+        token.setToken(newToken);
+        token.setTokenExpiredAt(expiredAt);
+        tokenRepository.save(token);
+
+        mockMvc.perform(get("/kos-agus/users")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .header(
+                                        "API-TOKEN-KOS-AGUS-APIK",
+                                        newToken
+                                )
+        ).andExpectAll(
+                status().isOk()
+        ).andDo(result -> {
+            WebResponse<List<UsersResponse>> response = objectMapper.readValue(
+                    result.getResponse().getContentAsString(),
+                    new TypeReference<>() {
+
+                    }
+            );
+
+            assertNull(response.getErrors());
+            assertEquals(
+                    "OK 200",
+                    response.getStatus()
+            );
+            assertTrue(response.getData() instanceof List);
+            System.out.println(objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(response.getErrors()));
+        });
+    }
+
+
+//    @Test
+//    void updateUser() throws Exception {
+//
+//        UsersUpdateRequest request = new UsersUpdateRequest();
+//        request.setUsername("bambang");
+//        request.setPassword(BCrypt.hashpw(
+//                "bambang_password",
+//                BCrypt.gensalt()
+//        ));
+//        request.setName("bambangl_lipuro");
+//        request.setPhone("9102930192309");
+//        request.setEmail("bambang@lipuro.com");
+//        request.setRoles(Role.customers);
+//
+//        mockMvc.perform(put("/kos-agus/users/current")
+//        ).andExpectAll(
+//                status().isOk()
+//        ).andDo(result -> {
+//
+//        });
+//    }
 
 }

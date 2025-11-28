@@ -3,8 +3,10 @@ package com.anas.kos_agus_apik.service;
 
 import com.anas.kos_agus_apik.entity.User;
 import com.anas.kos_agus_apik.model.request.CreateUserRequest;
+import com.anas.kos_agus_apik.model.request.UsersUpdateRequest;
 import com.anas.kos_agus_apik.model.response.CreateUserResponse;
 import com.anas.kos_agus_apik.model.response.UsersResponse;
+import com.anas.kos_agus_apik.model.response.UsersUpdateResponse;
 import com.anas.kos_agus_apik.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -88,6 +90,38 @@ public class UserService {
                 .roles(user.getRoles())
                 .build();
     }
+
+    @Transactional
+    public UsersUpdateResponse updateUser(User user, UsersUpdateRequest request) {
+
+        validationService.validate(request);
+
+        User updateTarget = userRepository.findById(user.getId())
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND, "User not found"));
+
+        updateTarget.setUsername(request.getUsername());
+        updateTarget.setPassword(BCrypt.hashpw(
+                request.getPassword(),
+                BCrypt.gensalt()
+        ));
+        updateTarget.setName(request.getName());
+        updateTarget.setPhone(request.getPhone());
+        updateTarget.setEmail(request.getEmail());
+        updateTarget.setRoles(request.getRoles());
+        userRepository.save(updateTarget);
+
+        return UsersUpdateResponse.builder()
+                .id(user.getId())
+                .username(request.getUsername())
+                .name(request.getName())
+                .phone(request.getPhone())
+                .email(request.getEmail())
+                .roles(request.getRoles())
+                .build();
+
+    }
+
 
 
 }
