@@ -7,6 +7,7 @@ import com.anas.kos_agus_apik.model.request.LoginUserRequest;
 import com.anas.kos_agus_apik.model.request.UsersUpdateRequest;
 import com.anas.kos_agus_apik.model.response.TokenResponse;
 import com.anas.kos_agus_apik.model.response.UsersResponse;
+import com.anas.kos_agus_apik.model.response.UsersUpdateResponse;
 import com.anas.kos_agus_apik.model.web_response.WebResponse;
 import com.anas.kos_agus_apik.model.request.CreateUserRequest;
 import com.anas.kos_agus_apik.model.response.CreateUserResponse;
@@ -27,6 +28,7 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -78,6 +80,17 @@ class UserControllerTest {
         user.setEmail("anas@example.com");
         user.setRoles(Role.admin);
         userRepository.save(user);
+
+        // --- Setup token ---
+        String newToken = UUID.randomUUID().toString();
+        LocalDateTime expiredAt = LocalDateTime.now().plusHours(2);
+
+        Token token = new Token();
+        token.setId(UUID.randomUUID().toString());
+        token.setUser(user);
+        token.setToken("@anas_token");
+        token.setTokenExpiredAt(expiredAt);
+        tokenRepository.save(token);
 
     }
 
@@ -131,6 +144,12 @@ class UserControllerTest {
                     new TypeReference<>() {
                     }
             );
+
+            assertEquals(
+                    "CREATED 201",
+                    response.getStatus()
+            );
+
             assertNull(response.getErrors());
             assertEquals(
                     "@anas_username_request",
@@ -172,46 +191,11 @@ class UserControllerTest {
     @Test
     void getUsersSuccess() throws Exception {
 
-        // --- Setup user unik ---
-        User user = new User();
-        user.setId(UUID.randomUUID().toString());
-        user.setUsername("user_" + UUID.randomUUID().toString().substring(
-                0,
-                8
-        ));
-        user.setPassword(BCrypt.hashpw(
-                "anas_password",
-                BCrypt.gensalt()
-        ));
-        user.setName("Anas Test User");
-        user.setNik(UUID.randomUUID().toString().substring(
-                0,
-                12
-        )); // unik, 12 digit cukup
-        user.setPhone("08" + (long) (Math.random() * 1000000000L)); // random nomor
-        user.setEmail("anas_" + UUID.randomUUID().toString().substring(
-                0,
-                6
-        ) + "@example.com");
-        user.setRoles(Role.admin);
-        userRepository.save(user);
-
-        // --- Setup token ---
-        String newToken = UUID.randomUUID().toString();
-        LocalDateTime expiredAt = LocalDateTime.now().plusHours(2);
-
-        Token token = new Token();
-        token.setId(UUID.randomUUID().toString());
-        token.setUser(user);
-        token.setToken(newToken);
-        token.setTokenExpiredAt(expiredAt);
-        tokenRepository.save(token);
-
         mockMvc.perform(get("/kos-agus/users/current")
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .header(
                                         "API-TOKEN-KOS-AGUS-APIK",
-                                        newToken
+                                        "@anas_token"
                                 )
         ).andExpectAll(
                 status().isOk()
@@ -259,46 +243,11 @@ class UserControllerTest {
     @Test
     void getAllUsersSuccess() throws Exception {
 
-        // --- Setup user unik ---
-        User user = new User();
-        user.setId(UUID.randomUUID().toString());
-        user.setUsername("user_" + UUID.randomUUID().toString().substring(
-                0,
-                8
-        ));
-        user.setPassword(BCrypt.hashpw(
-                "anas_password",
-                BCrypt.gensalt()
-        ));
-        user.setName("Anas Test User");
-        user.setNik(UUID.randomUUID().toString().substring(
-                0,
-                12
-        )); // unik, 12 digit cukup
-        user.setPhone("08" + (long) (Math.random() * 1000000000L)); // random nomor
-        user.setEmail("anas_" + UUID.randomUUID().toString().substring(
-                0,
-                6
-        ) + "@example.com");
-        user.setRoles(Role.admin);
-        userRepository.save(user);
-
-        // --- Setup token ---
-        String newToken = UUID.randomUUID().toString();
-        LocalDateTime expiredAt = LocalDateTime.now().plusHours(2);
-
-        Token token = new Token();
-        token.setId(UUID.randomUUID().toString());
-        token.setUser(user);
-        token.setToken(newToken);
-        token.setTokenExpiredAt(expiredAt);
-        tokenRepository.save(token);
-
         mockMvc.perform(get("/kos-agus/users")
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .header(
                                         "API-TOKEN-KOS-AGUS-APIK",
-                                        newToken
+                                       "@anas_token"
                                 )
         ).andExpectAll(
                 status().isOk()
@@ -321,26 +270,50 @@ class UserControllerTest {
     }
 
 
-//    @Test
-//    void updateUser() throws Exception {
-//
-//        UsersUpdateRequest request = new UsersUpdateRequest();
-//        request.setUsername("bambang");
-//        request.setPassword(BCrypt.hashpw(
-//                "bambang_password",
-//                BCrypt.gensalt()
-//        ));
-//        request.setName("bambangl_lipuro");
-//        request.setPhone("9102930192309");
-//        request.setEmail("bambang@lipuro.com");
-//        request.setRoles(Role.customers);
-//
-//        mockMvc.perform(put("/kos-agus/users/current")
-//        ).andExpectAll(
-//                status().isOk()
-//        ).andDo(result -> {
-//
-//        });
-//    }
+    @Test
+    void updateUser() throws Exception {
+
+        UsersUpdateRequest request = new UsersUpdateRequest();
+        request.setUsername("bambang");
+        request.setPassword(BCrypt.hashpw(
+                "bambang_password",
+                BCrypt.gensalt()
+        ));
+        request.setName("bambang_lipuro");
+        request.setPhone("9102930192309");
+        request.setEmail("bambang@lipuro.com");
+        request.setRoles(Role.customers);
+
+        mockMvc.perform(patch("/kos-agus/users/current")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .header(
+                                        "API-TOKEN-KOS-AGUS-APIK",
+                                        "@anas_token"
+                                )
+                                .content(objectMapper.writeValueAsString(request))
+        ).andExpectAll(
+                status().isCreated()
+        ).andDo(result -> {
+            WebResponse<UsersUpdateResponse> response =
+                    objectMapper.readValue(
+                            result.getResponse().getContentAsString(),
+                            new TypeReference<>() {
+                            }
+                    );
+
+            assertEquals(
+                    "CREATED 201",
+                    response.getStatus()
+            );
+
+            Optional<User> user = Optional.ofNullable(userRepository.findByUsername("bambang")
+                                                              .orElseThrow(() -> new RuntimeException("User not found")));
+
+            assertEquals(
+                    request.getUsername(),
+                    user.get().getUsername()
+            );
+        });
+    }
 
 }

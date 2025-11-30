@@ -1,4 +1,4 @@
-## 🔹 Endpoints
+## USER API Documentation
 
 ### 1. Create User ✅
 
@@ -91,7 +91,7 @@
 }
 ```
 
-### 4. Update User  [unit test have not created ❌]
+### 4. Update User ✅
 
 **`PUT /kos-agus/users/{id}`**
 
