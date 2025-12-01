@@ -29,8 +29,7 @@
     "title": "kamar 1",
     "availability": "available",
     "details": "kamar mandi dalam",
-    "price": 1000000,
-    "created_at" : "2025-11-28T14:50:10"
+    "price": 1000000
   }
 }
 
@@ -49,14 +48,7 @@
 ```json
 {
   "status": "200 OK",
-  "data": {
-    "id": "uuid-2",
-    "title": "kamar 1",
-    "availability": "available",
-    "details": "kamar mandi dalam",
-    "price": 1000000,
-    "created_at" : "2025-11-28T14:50:10"
-  }
+  "data": "room deleted successfully"
 }
 
 ```
@@ -90,8 +82,7 @@
     "title": "kamar 3",
     "availability": "booked",
     "details": "kamar mandi luar",
-    "price": 1500000,
-    "created_at" : "2025-11-28T14:50:10"
+    "price": 1500000
   }
 }
 
@@ -115,16 +106,14 @@
       "title": "kamar 3",
       "availability": "booked",
       "details": "kamar mandi luar",
-      "price": 1500000,
-      "created_at": "2025-11-28T14:50:10"
+      "price": 1500000
     },
     {
       "id": "uuid-2",
       "title": "kamar 1",
       "availability": "available",
       "details": "kamar mandi dalam",
-      "price": 1000000,
-      "created_at": "2025-11-28T14:50:10"
+      "price": 1000000
     }
   ]
 }
@@ -149,8 +138,7 @@
     "title": "kamar 3",
     "availability": "booked",
     "details": "kamar mandi luar",
-    "price": 1500000,
-    "created_at" : "2025-11-28T14:50:10"
+    "price": 1500000
   }
 }
 

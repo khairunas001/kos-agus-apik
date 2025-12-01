@@ -28,6 +28,7 @@ public class Room {
     private String title;
 
     @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
     private AvailabilityRoom availability;
 
     @Column(nullable = false, columnDefinition = "TEXT")
