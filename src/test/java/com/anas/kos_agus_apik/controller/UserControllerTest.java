@@ -146,7 +146,7 @@ class UserControllerTest {
             );
 
             assertEquals(
-                    "CREATED 201",
+                    "201 CREATED",
                     response.getStatus()
             );
 
@@ -209,7 +209,7 @@ class UserControllerTest {
 
             assertNull(response.getErrors());
             assertEquals(
-                    "OK 200",
+                    "200 OK",
                     response.getStatus()
             );
             System.out.println(objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(response.getErrors()));
@@ -261,7 +261,7 @@ class UserControllerTest {
 
             assertNull(response.getErrors());
             assertEquals(
-                    "OK 200",
+                    "200 OK",
                     response.getStatus()
             );
             assertTrue(response.getData() instanceof List);
@@ -271,7 +271,7 @@ class UserControllerTest {
 
 
     @Test
-    void updateUser() throws Exception {
+    void updateUserSuccess() throws Exception {
 
         UsersUpdateRequest request = new UsersUpdateRequest();
         request.setUsername("bambang");
@@ -302,7 +302,7 @@ class UserControllerTest {
                     );
 
             assertEquals(
-                    "CREATED 201",
+                    "201 CREATED",
                     response.getStatus()
             );
 

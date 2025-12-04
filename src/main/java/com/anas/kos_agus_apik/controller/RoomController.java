@@ -9,9 +9,7 @@ import com.anas.kos_agus_apik.service.RoomService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 public class RoomController {
@@ -32,6 +30,17 @@ public class RoomController {
         );
 
         return ResponseFactory.created(response);
+    }
+
+    @DeleteMapping(
+            path = "/kos-agus/rooms/delete/{room_id}"
+    )
+    private ResponseEntity<WebResponseSuccess<String>> deleteRoom(User user, @PathVariable("room_id") String roomID){
+
+        roomService.deleteRoom(user,roomID);
+
+        return ResponseFactory.ok("room already deleted");
+
     }
 
 }

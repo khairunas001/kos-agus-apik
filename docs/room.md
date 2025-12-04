@@ -1,6 +1,6 @@
 ## ROOM API Documentation
 
-### 1. Create Room ❌
+### 1. Create Room ✅
 
 **`POST /kos-agus/rooms/create`**
 
@@ -34,7 +34,7 @@
 }
 
 ```
-### 2. Delete room ❌
+### 2. Delete room -kurang testing❌
 
 
 **`DELETE /kos-agus/rooms/delete/{room_id}`**

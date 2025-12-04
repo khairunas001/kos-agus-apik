@@ -9,7 +9,7 @@ public class ResponseFactory {
 
     public static <T> WebResponseSuccess<T> build(HttpStatus status, T data) {
         return WebResponseSuccess.<T>builder()
-                .status(status.name() + " " + status.value())
+                .status(status.value() + " " + status.name())
                 .data(data)
                 .build();
     }

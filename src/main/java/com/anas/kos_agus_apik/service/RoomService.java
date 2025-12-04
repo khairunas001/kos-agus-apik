@@ -11,6 +11,7 @@ import com.anas.kos_agus_apik.repository.UserRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.DeleteMapping;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -62,4 +63,17 @@ public class RoomService {
                 .build();
     }
 
+    @Transactional
+    public void deleteRoom(User user, String roomId) {
+
+        // Cek apakah user adalah admin
+        if (user.getRoles() != Role.admin) {
+            throw new RuntimeException("only admin can create room");
+        }
+
+        // cek dulu apakah data masih ada sebelum delete
+        Room room = roomRepository.findById(roomId).orElseThrow(() -> new RuntimeException("room not found"));
+
+        roomRepository.delete(room);
+    }
 }
