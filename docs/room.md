@@ -34,7 +34,7 @@
 }
 
 ```
-### 2. Delete room -kurang testing❌
+### 2. Delete room ✅
 
 
 **`DELETE /kos-agus/rooms/delete/{room_id}`**

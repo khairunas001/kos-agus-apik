@@ -69,6 +69,18 @@ public class ErrorController {
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
     }
 
+
+    @ExceptionHandler(RuntimeException.class)
+    public ResponseEntity<WebResponse<String>> runtimError(RuntimeException ex){
+        if(ex.getMessage().equals("room not found")){
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(new WebResponse<>("404 NOT_FOUND", null, ex.getMessage()));
+        }
+
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(new WebResponse<>("500 INTERNAL_SERVER_ERROR", null, ex.getMessage()));
+    }
+
     // この生活は、どうすれば良いんでしょうか？
     // 仕事はまだ持ってないのに、うまくになりたいけど、誰も時間を上げないのおおお
     // ま。。、　明日もいるしい、まだあけらめないよお、　未来は誰もしているなので。

@@ -175,4 +175,76 @@ class RoomControllerTest {
 
     }
 
+    @Test
+    void deleteRoomBadRequest() throws Exception {
+        mockMvc.perform(
+                delete("/kos-agus/rooms/delete/1231231")
+                        .accept(MediaType.APPLICATION_JSON)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .header(
+                                "API-TOKEN-KOS-AGUS-APIK",
+                                "@anas_token_room"
+                        )
+        ).andExpectAll(
+                status().isNotFound()
+        ).andDo(result -> {
+            WebResponse<RoomResponse> response = objectMapper.readValue(
+                    result.getResponse().getContentAsString(),
+                    new TypeReference<>() {
+                    }
+            );
+
+            assertNotNull(response.getErrors());
+
+            System.out.println(response);
+
+        });
+
+
+    }
+
+
+    @Test
+    void deleteRoomSuccces() throws Exception {
+
+        Room room = new Room();
+        room.setId("room-keluarga-joko");
+        room.setUser(user);
+        room.setTitle("Room 1");
+        room.setAvailability(AvailabilityRoom.available);
+        room.setDetails("kamar mandi dalam");
+        room.setPrice(8000000L);
+        room.setCreatedAt(LocalDateTime.now());
+        roomRepository.save(room);
+
+        mockMvc.perform(delete("/kos-agus/rooms/delete/" + room.getId())
+                                .accept(MediaType.APPLICATION_JSON)
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .header(
+                                        "API-TOKEN-KOS-AGUS-APIK",
+                                        "@anas_token_room"
+                                )
+        ).andExpectAll(
+                status().isOk()
+        ).andDo(result -> {
+            WebResponse<String> response = objectMapper.readValue(
+                    result.getResponse().getContentAsString(),
+                    new TypeReference<>() {
+                    }
+            );
+
+            assertNull(response.getErrors());
+
+            assertEquals(
+                    "200 OK",
+                    response.getStatus()
+            );
+
+            System.out.println(response);
+
+        });
+
+
+    }
+
 }
