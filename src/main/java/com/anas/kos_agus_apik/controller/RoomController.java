@@ -11,6 +11,8 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 public class RoomController {
 
@@ -41,6 +43,17 @@ public class RoomController {
 
         return ResponseFactory.ok("room already deleted");
 
+    }
+
+    @GetMapping(
+            path = "/kos-agus/rooms",
+            produces = MediaType.APPLICATION_JSON_VALUE
+    )
+    private ResponseEntity<WebResponseSuccess<List<RoomResponse>>> getAllRooms(User user){
+
+        List<RoomResponse> response = roomService.getAllRoom(user);
+
+        return ResponseFactory.ok(response);
     }
 
 }

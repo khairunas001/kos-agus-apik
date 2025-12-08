@@ -88,7 +88,7 @@
 
 ```
 
-### 4. Get All Room ❌
+### 4. Get All Room -kurang test❌
 
 **`GET /kos-agus/rooms`**
 

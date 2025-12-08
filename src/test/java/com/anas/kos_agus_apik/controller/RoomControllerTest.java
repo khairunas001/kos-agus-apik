@@ -25,6 +25,7 @@ import org.springframework.security.crypto.bcrypt.BCrypt;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -125,7 +126,7 @@ class RoomControllerTest {
     }
 
     @Test
-    void createRoomSuccesss() throws Exception {
+    void createRoomSuccess() throws Exception {
         CreateRoomRequest request = new CreateRoomRequest();
         request.setTitle("kamar 69");
         request.setAvailability(AvailabilityRoom.available);
@@ -205,7 +206,7 @@ class RoomControllerTest {
 
 
     @Test
-    void deleteRoomSuccces() throws Exception {
+    void deleteRoomSuccess() throws Exception {
 
         Room room = new Room();
         room.setId("room-keluarga-joko");
@@ -238,6 +239,92 @@ class RoomControllerTest {
             assertEquals(
                     "200 OK",
                     response.getStatus()
+            );
+
+            System.out.println(response);
+
+        });
+
+
+    }
+
+
+    @Test
+    void getAllRoomUnauthorized() throws Exception {
+
+        mockMvc.perform(get("/kos-agus/rooms")
+                                .contentType(MediaType.APPLICATION_JSON)
+        ).andExpectAll(
+                status().isUnauthorized()
+        ).andDo(result -> {
+            WebResponse<String> response = objectMapper.readValue(
+                    result.getResponse().getContentAsString(),
+                    new TypeReference<>() {
+                    }
+            );
+
+            assertNotNull(response.getErrors());
+
+            assertEquals(
+                    "401 UNAUTHORIZED",
+                    response.getStatus()
+            );
+
+            System.out.println(response);
+
+        });
+
+
+    }
+
+    @Test
+    void getAllRoomSuccess() throws Exception {
+
+        Room room = new Room();
+        for (int i = 1; i < 10; i++) {
+            room.setId("room-keluarga" + UUID.randomUUID().toString());
+            room.setUser(user);
+            room.setTitle("Room " + i);
+            room.setAvailability(AvailabilityRoom.available);
+            String kamarMandi = "Kamar mandi dalam";
+            if (i%2 == 0){
+                kamarMandi = "Kamar mandi Luar";
+            }
+            room.setDetails(kamarMandi);
+            Long price = 8000000L;
+            if (i%2 == 0){
+                price = 800000L;
+            }
+            room.setPrice(price);
+            room.setCreatedAt(LocalDateTime.now());
+            roomRepository.save(room);
+        }
+
+        mockMvc.perform(get("/kos-agus/rooms")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .header(
+                                        "API-TOKEN-KOS-AGUS-APIK",
+                                        "@anas_token_room"
+                                )
+        ).andExpectAll(
+                status().isOk()
+        ).andDo(result -> {
+            WebResponse<List<RoomResponse>> response = objectMapper.readValue(
+                    result.getResponse().getContentAsString(),
+                    new TypeReference<>() {
+                    }
+            );
+
+            assertNull(response.getErrors());
+
+            assertEquals(
+                    "200 OK",
+                    response.getStatus()
+            );
+
+            assertInstanceOf(
+                    List.class,
+                    response.getData()
             );
 
             System.out.println(response);

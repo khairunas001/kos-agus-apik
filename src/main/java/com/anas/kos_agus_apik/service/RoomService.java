@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.DeleteMapping;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -75,5 +76,28 @@ public class RoomService {
         Room room = roomRepository.findById(roomId).orElseThrow(() -> new RuntimeException("room not found"));
 
         roomRepository.delete(room);
+    }
+
+    @Transactional
+    public List<RoomResponse> getAllRoom(User user) {
+
+        // cek apakah user adalah admin
+        if (user.getRoles() != Role.admin) {
+            throw new RuntimeException("only admin can create room");
+        }
+
+        // ambil semua data pada table room
+        List<Room> rooms = roomRepository.findAll();
+
+
+        return rooms.stream()
+                .map(room -> RoomResponse.builder()
+                        .id(room.getId())
+                        .title(room.getTitle())
+                        .availability(room.getAvailability())
+                        .details(room.getDetails())
+                        .price(room.getPrice())
+                        .build()
+                ).toList();
     }
 }
