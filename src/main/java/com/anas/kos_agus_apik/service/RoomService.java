@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -76,6 +77,25 @@ public class RoomService {
         Room room = roomRepository.findById(roomId).orElseThrow(() -> new RuntimeException("room not found"));
 
         roomRepository.delete(room);
+    }
+
+    @Transactional
+    public RoomResponse getRoom(User user, String roomId) {
+
+        // cek apakah user adalah admin
+        if (user.getRoles() != Role.admin) {
+            throw new RuntimeException("only admin can create room");
+        }
+
+        Room room = roomRepository.findById(roomId).orElseThrow(() -> new RuntimeException("room not found"));
+
+        return RoomResponse.builder()
+                .id(room.getId())
+                .title(room.getTitle())
+                .availability(room.getAvailability())
+                .details(room.getDetails())
+                .price(room.getPrice())
+                .build();
     }
 
     @Transactional

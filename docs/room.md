@@ -88,7 +88,7 @@
 
 ```
 
-### 4. Get All Room -kurang test❌
+### 4. Get All Room ✅
 
 **`GET /kos-agus/rooms`**
 
@@ -120,7 +120,7 @@
 
 ```
 
-### 5. Get Room ❌
+### 5. Get Room ✅
 
 **`GET /kos-agus/rooms/{room_id}`**
 

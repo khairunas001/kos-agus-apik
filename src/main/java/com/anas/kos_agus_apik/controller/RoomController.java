@@ -37,19 +37,36 @@ public class RoomController {
     @DeleteMapping(
             path = "/kos-agus/rooms/delete/{room_id}"
     )
-    private ResponseEntity<WebResponseSuccess<String>> deleteRoom(User user, @PathVariable("room_id") String roomID){
+    private ResponseEntity<WebResponseSuccess<String>> deleteRoom(User user, @PathVariable("room_id") String roomID) {
 
-        roomService.deleteRoom(user,roomID);
+        roomService.deleteRoom(
+                user,
+                roomID
+        );
 
         return ResponseFactory.ok("room already deleted");
 
     }
 
     @GetMapping(
+            path = "/kos-agus/rooms/{roomId}",
+            produces = MediaType.APPLICATION_JSON_VALUE
+    )
+    private ResponseEntity<WebResponseSuccess<RoomResponse>> getRoom(User user, @PathVariable String roomId) {
+
+        RoomResponse response = roomService.getRoom(
+                user,
+                roomId
+        );
+
+        return ResponseFactory.ok(response);
+    }
+
+    @GetMapping(
             path = "/kos-agus/rooms",
             produces = MediaType.APPLICATION_JSON_VALUE
     )
-    private ResponseEntity<WebResponseSuccess<List<RoomResponse>>> getAllRooms(User user){
+    private ResponseEntity<WebResponseSuccess<List<RoomResponse>>> getAllRooms(User user) {
 
         List<RoomResponse> response = roomService.getAllRoom(user);
 
