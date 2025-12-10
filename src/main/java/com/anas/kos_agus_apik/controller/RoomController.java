@@ -3,6 +3,7 @@ package com.anas.kos_agus_apik.controller;
 import com.anas.kos_agus_apik.entity.User;
 import com.anas.kos_agus_apik.model.ResponseFactory;
 import com.anas.kos_agus_apik.model.request.CreateRoomRequest;
+import com.anas.kos_agus_apik.model.request.UpdateRoomRequest;
 import com.anas.kos_agus_apik.model.response.RoomResponse;
 import com.anas.kos_agus_apik.model.web_response.WebResponseSuccess;
 import com.anas.kos_agus_apik.service.RoomService;
@@ -72,5 +73,24 @@ public class RoomController {
 
         return ResponseFactory.ok(response);
     }
+
+    @PatchMapping(
+            path = "/kos-agus/rooms/update/{room_id}",
+            consumes = MediaType.APPLICATION_JSON_VALUE,
+            produces = MediaType.APPLICATION_JSON_VALUE
+    )
+    private ResponseEntity<WebResponseSuccess<RoomResponse>> updateRooms(
+            User user,
+            @RequestBody UpdateRoomRequest request,
+            @PathVariable("room_id") String roomId
+    ) {
+        RoomResponse response = roomService.updateRoom(
+                user,
+                request,
+                roomId
+        );
+        return ResponseFactory.ok(response);
+    }
+
 
 }

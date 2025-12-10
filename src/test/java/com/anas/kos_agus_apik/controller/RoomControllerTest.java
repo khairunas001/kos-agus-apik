@@ -6,6 +6,7 @@ import com.anas.kos_agus_apik.entity.User;
 import com.anas.kos_agus_apik.entity.enum_class.AvailabilityRoom;
 import com.anas.kos_agus_apik.entity.enum_class.Role;
 import com.anas.kos_agus_apik.model.request.CreateRoomRequest;
+import com.anas.kos_agus_apik.model.request.UpdateRoomRequest;
 import com.anas.kos_agus_apik.model.response.RoomResponse;
 import com.anas.kos_agus_apik.model.web_response.WebResponse;
 import com.anas.kos_agus_apik.repository.RoomRepository;
@@ -165,7 +166,7 @@ class RoomControllerTest {
             assertNull(response.getErrors());
 
             assertEquals(
-                    "CREATED 201",
+                    "201 CREATED",
                     response.getStatus()
             );
 
@@ -287,12 +288,12 @@ class RoomControllerTest {
             room.setTitle("Room " + i);
             room.setAvailability(AvailabilityRoom.available);
             String kamarMandi = "Kamar mandi dalam";
-            if (i%2 == 0){
+            if (i % 2 == 0) {
                 kamarMandi = "Kamar mandi Luar";
             }
             room.setDetails(kamarMandi);
             Long price = 8000000L;
-            if (i%2 == 0){
+            if (i % 2 == 0) {
                 price = 800000L;
             }
             room.setPrice(price);
@@ -330,8 +331,182 @@ class RoomControllerTest {
             System.out.println(response);
 
         });
+    }
+
+    @Test
+    void getRoomNotFound() throws Exception {
+
+        mockMvc.perform(get("/kos-agus/rooms/paijo-kos-1")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .header(
+                                        "API-TOKEN-KOS-AGUS-APIK",
+                                        "@anas_token_room"
+                                )
+        ).andExpectAll(
+                status().isNotFound()
+        ).andDo(result -> {
+            WebResponse<String> response = objectMapper.readValue(
+                    result.getResponse().getContentAsString(),
+                    new TypeReference<>() {
+                    }
+            );
+
+            assertNotNull(response.getErrors());
+
+            assertEquals(
+                    "404 NOT_FOUND",
+                    response.getStatus()
+            );
+
+            System.out.println(response);
+
+        });
+    }
+
+    @Test
+    void getRoomSuccess() throws Exception {
+
+        Room room = new Room();
+        for (int i = 1; i < 10; i++) {
+            room.setId("room-keluarga" + i);
+            room.setUser(user);
+            room.setTitle("Room " + i);
+            room.setAvailability(AvailabilityRoom.available);
+            String kamarMandi = "Kamar mandi dalam";
+            if (i % 2 == 0) {
+                kamarMandi = "Kamar mandi Luar";
+            }
+            room.setDetails(kamarMandi);
+            Long price = 8000000L;
+            if (i % 2 == 0) {
+                price = 800000L;
+            }
+            room.setPrice(price);
+            room.setCreatedAt(LocalDateTime.now());
+            roomRepository.save(room);
+        }
+
+        List<Room> rooms = roomRepository.findAll();
+        Room thirdRoom = rooms.get(2);
+
+        mockMvc.perform(get("/kos-agus/rooms/" + thirdRoom.getId())
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .header(
+                                        "API-TOKEN-KOS-AGUS-APIK",
+                                        "@anas_token_room"
+                                )
+        ).andExpectAll(
+                status().isOk()
+        ).andDo(result -> {
+            WebResponse<RoomResponse> response = objectMapper.readValue(
+                    result.getResponse().getContentAsString(),
+                    new TypeReference<>() {
+                    }
+            );
+
+            assertNull(response.getErrors());
+
+            assertEquals(
+                    "200 OK",
+                    response.getStatus()
+            );
+
+            System.out.println(response);
+
+        });
+    }
+
+    @Test
+    void updateRoomNotFound() throws Exception {
+
+        UpdateRoomRequest request = new UpdateRoomRequest();
+        request.setTitle("dummy");
+        request.setAvailability(AvailabilityRoom.available);
+        request.setDetails("dummy");
+        request.setPrice(1000L);
+
+        mockMvc.perform(
+                        patch("/kos-agus/rooms/update/mulyadi")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .accept(MediaType.APPLICATION_JSON)
+                                .header(
+                                        "API-TOKEN-KOS-AGUS-APIK",
+                                        "@anas_token_room"
+                                )
+                                .content(objectMapper.writeValueAsString(request))
+                )
+                .andExpect(
+                        status().isNotFound())
+                .andDo(result -> {
+                    WebResponse<String> response = objectMapper.readValue(
+                            result.getResponse().getContentAsString(),
+                            new TypeReference<>() {
+                            }
+                    );
+
+                    assertNotNull(response.getErrors());
+                    assertEquals(
+                            "404 NOT_FOUND",
+                            response.getStatus()
+                    );
+                    System.out.println(response);
+                });
+    }
 
 
+    @Test
+    void updateRoomSuccess() throws Exception {
+
+        Room room = new Room();
+        room.setId("room-anas" + UUID.randomUUID().toString());
+        room.setUser(user);
+        room.setTitle("Room " + UUID.randomUUID().toString());
+        room.setAvailability(AvailabilityRoom.available);
+        room.setDetails("kamar mandi dalam");
+        room.setPrice(1000000L);
+        room.setCreatedAt(LocalDateTime.now());
+        roomRepository.save(room);
+
+        UpdateRoomRequest request = new UpdateRoomRequest();
+        request.setTitle("Room bagyo");
+        request.setAvailability(AvailabilityRoom.booked);
+        request.setDetails("kamar mandi luar");
+        request.setPrice(1000000L);
+
+        mockMvc.perform(patch("/kos-agus/rooms/update/" + room.getId())
+                                .accept(MediaType.APPLICATION_JSON)
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(request))
+                                .header(
+                                        "API-TOKEN-KOS-AGUS-APIK",
+                                        "@anas_token_room"
+                                )
+        ).andExpectAll(
+                status().isOk()
+        ).andDo(result -> {
+            WebResponse<RoomResponse> response = objectMapper.readValue(
+                    result.getResponse().getContentAsString(),
+                    new TypeReference<>() {
+                    }
+            );
+
+            assertNull(response.getErrors());
+
+            assertEquals(
+                    "200 OK",
+                    response.getStatus()
+            );
+
+            Room roomUpdated = roomRepository.findById(room.getId()).orElseThrow(() -> new RuntimeException("room not found"));
+
+            assertEquals(
+                    "Room bagyo",
+                    roomUpdated.getTitle()
+            );
+
+            System.out.println(response);
+
+        });
     }
 
 }

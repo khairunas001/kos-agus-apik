@@ -53,7 +53,7 @@
 
 ```
 
-### 3. Update Room ❌
+### 3. Update Room ✅ 
 
 **`PATCH /kos-agus/rooms/update/{room_id}`**
 

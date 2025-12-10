@@ -4,14 +4,17 @@ import com.anas.kos_agus_apik.entity.Room;
 import com.anas.kos_agus_apik.entity.User;
 import com.anas.kos_agus_apik.entity.enum_class.Role;
 import com.anas.kos_agus_apik.model.request.CreateRoomRequest;
+import com.anas.kos_agus_apik.model.request.UpdateRoomRequest;
 import com.anas.kos_agus_apik.model.response.RoomResponse;
 import com.anas.kos_agus_apik.repository.RoomRepository;
 import com.anas.kos_agus_apik.repository.TokenRepository;
 import com.anas.kos_agus_apik.repository.UserRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -119,5 +122,36 @@ public class RoomService {
                         .price(room.getPrice())
                         .build()
                 ).toList();
+    }
+
+    @Transactional
+    public RoomResponse updateRoom(User user, UpdateRoomRequest request, String roomId) {
+
+        // Validasi request
+        validationService.validate(request);
+
+        // cek apakah user adalah admin
+        if (user.getRoles() != Role.admin) {
+            throw new RuntimeException("only admin can create room");
+        }
+
+        // cari room target
+        Room roomTarget = roomRepository.findById(roomId).orElseThrow(() -> new ResponseStatusException(
+                HttpStatus.NOT_FOUND,
+                "Room not found"
+        ));
+        roomTarget.setTitle(request.getTitle());
+        roomTarget.setAvailability(request.getAvailability());
+        roomTarget.setDetails(request.getDetails());
+        roomTarget.setPrice(request.getPrice());
+        roomRepository.save(roomTarget);
+
+        return RoomResponse.builder()
+                .id(roomTarget.getId())
+                .title(request.getTitle())
+                .availability(request.getAvailability())
+                .details(request.getDetails())
+                .price(request.getPrice())
+                .build();
     }
 }
