@@ -7,8 +7,7 @@
 ### Request Header
 - `X-KOS-AGUS-API-TOKEN`: Token aktif (Mandatory)
 - Role = `costumers` (Mandatory)
-
-### create trasaksi, dan auto bikin room jadi on booked
+- create trasaksi, dan auto bikin room jadi on booked
 
 📥 Request Body:
 
@@ -42,10 +41,75 @@
 
 ```
 
+### 2. Update Room ✅❌
 
+**`PATCH /kos-agus/transactions/update/{transactions_id}`**
 
-# delete room, dan auto bikin room jadi avbailable lagi
+### Request Header
+- `X-KOS-AGUS-API-TOKEN`: Token aktif (Mandatory)
+- Role = `admin` (Mandatory)
+- update "payment_status": menjadi "success" dan update room_availability menjadi "booked"
+- update "payment_status": menjadi "canceled" dan room_availability menjadi "available"
 
-# update room, dan auto bikin room jadi avbailable lagi jika batal dan booked jika berhasil
+📥 Request Body:
 
-# get room, tampilkan semua data
+```json
+{
+  "payment_status": "success"
+}
+```
+
+📄 Response (201 Created):
+
+```json
+{
+  "status": "200 OK",
+  "data": {
+    "user_id": "user 1",
+    "room_id": "kamar 1",
+    "amount": "kamar mandi dalam",
+    "period": 1000000,
+    "payment_date": "2025-12-09 16:32:55",
+    "payment_status": "success",
+    "payment_method": "cash"
+  }
+}
+
+```
+
+### 2. Update Room ✅❌
+
+**`PATCH /kos-agus/transactions`**
+
+### Request Header
+- `X-KOS-AGUS-API-TOKEN`: Token aktif (Mandatory)
+-
+
+📄 Response (201 Created):
+
+```json
+{
+  "status": "200 OK",
+  "data": [
+    {
+      "user_id": "user 1",
+      "room_id": "kamar 1",
+      "amount": "kamar mandi dalam",
+      "period": 1000000,
+      "payment_date": "2025-12-09 16:32:55",
+      "payment_status": "success",
+      "payment_method": "cash"
+    },
+    {
+      "user_id": "user 1",
+      "room_id": "kamar 1",
+      "amount": "kamar mandi dalam",
+      "period": 1000000,
+      "payment_date": "2025-12-09 16:32:55",
+      "payment_status": "success",
+      "payment_method": "cash"
+    }
+  ]
+}
+
+```
