@@ -14,7 +14,6 @@
 
 ```json
 {
-  "user_id": "user-1",
   "room_id": "room-1",
   "duration_month": 1,
   "payment_method": "cash"

@@ -21,9 +21,6 @@ import java.time.LocalDateTime;
 public class CreateTransactionsRequest {
 
     @NotBlank
-    private String userId;
-
-    @NotBlank
     private String roomId;
 
     @NotNull
@@ -32,3 +29,4 @@ public class CreateTransactionsRequest {
     @NotBlank
     private String paymentMethod;
 }
+
