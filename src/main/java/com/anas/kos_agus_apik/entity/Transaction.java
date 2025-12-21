@@ -38,6 +38,7 @@ public class Transaction {
     @Column(nullable = false, name = "payment_date")
     private LocalDateTime paymentDate;
 
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false, name = "payment_status")
     private PaymentStatus paymentStatus;
 
