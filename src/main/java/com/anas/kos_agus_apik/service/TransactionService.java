@@ -7,6 +7,7 @@ import com.anas.kos_agus_apik.entity.enum_class.AvailabilityRoom;
 import com.anas.kos_agus_apik.entity.enum_class.PaymentStatus;
 import com.anas.kos_agus_apik.entity.enum_class.Role;
 import com.anas.kos_agus_apik.model.request.CreateTransactionsRequest;
+import com.anas.kos_agus_apik.model.response.RoomResponse;
 import com.anas.kos_agus_apik.model.response.TransactionResponse;
 import com.anas.kos_agus_apik.repository.RoomRepository;
 import com.anas.kos_agus_apik.repository.TransactionRepository;
@@ -47,11 +48,12 @@ public class TransactionService {
             throw new RuntimeException("only customers who can makes transactions");
         }
 
+        // validasi room apakah ada
         Room room = roomRepository.findById(request.getRoomId()).orElseThrow(() ->
                 new ResponseStatusException(HttpStatus.NOT_FOUND, "Room not found")
         );
 
-        //validasri room
+        //validasri room jika sudah di booking atau tidak
         if (room.getAvailability() == AvailabilityRoom.booked) {
             throw new ResponseStatusException(
                     HttpStatus.BAD_REQUEST,
@@ -59,34 +61,38 @@ public class TransactionService {
             );
         }
 
+
         Transaction transaction = new Transaction();
         transaction.setId(UUID.randomUUID().toString());
         transaction.setUser(user);
         transaction.setRoom(room);
 
-        //1. Ambil harga kamar
-        //room.price = 1.000.000 / bulan("duration_month")
-        // ️2. Hitung amount
-        // amount = room.price * duration_month
+        // hitung harga amount dengan mengalikan
         transaction.setAmount(request.getDurationMonth() * room.getPrice());
 
-        // 3. Hitung period
-        // startDate = now()
-        // endDate = now().plusMonths(duration_month)
+        // hitung periode
         transaction.setPeriod(LocalDate.now().plusMonths(request.getDurationMonth()));
         transaction.setPaymentDate(LocalDateTime.now());
         transaction.setPaymentStatus(PaymentStatus.pending);
         transaction.setPaymentMethod(request.getPaymentMethod());
         transactionRepository.save(transaction);
 
-        // 4.Auto update room
-        // room.status = "ON_BOOKED"
+        // update room availibility menjadi di booked
         room.setAvailability(AvailabilityRoom.booked);
 
         return TransactionResponse.builder()
                 .id(transaction.getId())
                 .userId(transaction.getUser().getId())
-                .roomId(transaction.getRoom().getId())
+//                .roomId(transaction.getRoom().getId())
+                .room(
+                        RoomResponse.builder()
+                                .id(room.getId())          // 🔥 key = roomId
+                                .title(room.getTitle())
+                                .availability(room.getAvailability())
+                                .details(room.getDetails())
+                                .price(room.getPrice())
+                                .build()
+                )
                 .amount(transaction.getAmount())
                 .period(transaction.getPeriod())
                 .paymentDate(transaction.getPaymentDate())
