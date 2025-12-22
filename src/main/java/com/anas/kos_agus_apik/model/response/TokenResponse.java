@@ -1,5 +1,6 @@
 package com.anas.kos_agus_apik.model.response;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -13,6 +14,7 @@ import java.time.LocalDateTime;
 @Builder
 public class TokenResponse {
 
+    @JsonProperty("user_id")
     private String userId;
 
     private String token;

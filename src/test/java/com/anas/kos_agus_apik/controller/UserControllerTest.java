@@ -62,8 +62,8 @@ class UserControllerTest {
 
     @BeforeEach
     void setUp() {
-        roomRepository.deleteAll();
         transactionRepository.deleteAll();
+        roomRepository.deleteAll();
         tokenRepository.deleteAll();
         userRepository.deleteAll();
 
