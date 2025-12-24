@@ -129,12 +129,12 @@ class TransactionControllerTest {
 
         // ---setup room booked---
         Room room2 = new Room();
-        room2.setId("kamar 1");
+        room2.setId("kamar 2");
         room2.setUser(user);
-        room2.setTitle("rooom 12");
-        room2.setAvailability(AvailabilityRoom.available);
+        room2.setTitle("rooom 22");
+        room2.setAvailability(AvailabilityRoom.booked);
         room2.setDetails("kamar mandi luar dalam");
-        room2.setPrice(900000L);
+        room2.setPrice(700000L);
         room2.setCreatedAt(LocalDateTime.now());
         roomRepository.save(room2);
 
@@ -166,18 +166,69 @@ class TransactionControllerTest {
 
             assertNull(response.getErrors());
             assertEquals(900000L, response.getData().getRoom().getPrice());
-            assertEquals(5*900000L, response.getData().getAmount());
+            assertEquals(5 * 900000L, response.getData().getAmount());
         });
 
     }
 
     @Test
-    void createTransactionsAlreadyBooked() {
+    void createTransactionsAlreadyBooked() throws Exception {
+
+        CreateTransactionsRequest request = new CreateTransactionsRequest();
+        request.setRoomId("kamar 2");
+        request.setDurationMonth(5);
+        request.setPaymentMethod("cash");
+
+        mockMvc.perform(post("/kos-agus/transactions/create")
+                .accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request))
+                .header(
+                        "API-TOKEN-KOS-AGUS-APIK",
+                        "@anas_token_room_costumers"
+                )
+        ).andExpectAll(
+                status().isBadRequest()
+        ).andDo(result -> {
+            WebResponse<TransactionResponse> response = objectMapper.readValue(
+                    result.getResponse().getContentAsString(),
+                    new TypeReference<>() {
+                    });
+
+            assertNotNull(response.getErrors());
+            assertEquals("Room already booked", response.getErrors());
+        });
 
     }
 
     @Test
-    void createTransactionsBadRequest() {
+    void createTransactionsNotFound() throws Exception {
+
+        CreateTransactionsRequest request = new CreateTransactionsRequest();
+        request.setRoomId("kamar 99");
+        request.setDurationMonth(5);
+        request.setPaymentMethod("cash");
+
+        mockMvc.perform(post("/kos-agus/transactions/create")
+                .accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request))
+                .header(
+                        "API-TOKEN-KOS-AGUS-APIK",
+                        "@anas_token_room_costumers"
+                )
+        ).andExpectAll(
+                status().isNotFound()
+        ).andDo(result -> {
+            WebResponse<TransactionResponse> response = objectMapper.readValue(
+                    result.getResponse().getContentAsString(),
+                    new TypeReference<>() {
+                    });
+
+            assertNotNull(response.getErrors());
+            assertEquals("Room not found", response.getErrors());
+        });
+
 
     }
 

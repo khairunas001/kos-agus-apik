@@ -1,6 +1,6 @@
 ## Transaction API Documentation
 
-### 1. Create Room ✅　-kurang unit test❌
+### 1. Create Transaction ✅
 
 **`POST /kos-agus/transactions/create`**
 
@@ -45,7 +45,7 @@
 
 ```
 
-### 2. Update Room ✅❌
+### 2. Update Transaction (Transaction confirmation) ✅❌
 
 **`PATCH /kos-agus/transactions/update/{transactions_id}`**
 
@@ -71,7 +71,13 @@
   "data": {
     "transactions_id" : "transactions 1",
     "user_id": "user 1",
-    "room_id": "kamar 1",
+    "room": {
+      "id": "63f63277-5854-49ed-8c07-9bba15b9c304",
+      "title": "kamar 9999",
+      "availability": "booked",
+      "details": "kamar mandi dalam",
+      "price": 1000000
+    },
     "amount": 1000000,
     "period": "2025-12-10 16:32:55",
     "payment_date": "2025-12-09 16:32:55",

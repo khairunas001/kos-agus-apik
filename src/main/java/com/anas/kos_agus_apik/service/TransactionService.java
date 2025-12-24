@@ -7,6 +7,7 @@ import com.anas.kos_agus_apik.entity.enum_class.AvailabilityRoom;
 import com.anas.kos_agus_apik.entity.enum_class.PaymentStatus;
 import com.anas.kos_agus_apik.entity.enum_class.Role;
 import com.anas.kos_agus_apik.model.request.CreateTransactionsRequest;
+import com.anas.kos_agus_apik.model.request.UpdatePaymentConfirmationRequest;
 import com.anas.kos_agus_apik.model.response.RoomResponse;
 import com.anas.kos_agus_apik.model.response.TransactionResponse;
 import com.anas.kos_agus_apik.repository.RoomRepository;
@@ -91,6 +92,71 @@ public class TransactionService {
                                 .availability(room.getAvailability())
                                 .details(room.getDetails())
                                 .price(room.getPrice())
+                                .build()
+                )
+                .amount(transaction.getAmount())
+                .period(transaction.getPeriod())
+                .paymentDate(transaction.getPaymentDate())
+                .paymentStatus(transaction.getPaymentStatus())
+                .paymentMethod(transaction.getPaymentMethod())
+                .build();
+    }
+
+    @Transactional
+    public TransactionResponse updateTransactionConfirmation(User user, UpdatePaymentConfirmationRequest request , String transactionsId) {
+
+        validationService.validate(request);
+
+        // validasi role harus admin
+        if (user.getRoles() != Role.admin) {
+            throw new ResponseStatusException(
+                    HttpStatus.FORBIDDEN,
+                    "only admin can confirm transactions"
+            );
+        }
+
+        // cek room berdasarkan roomId
+        Transaction transaction = transactionRepository.findById(transactionsId).orElseThrow(() ->
+                new ResponseStatusException(HttpStatus.NOT_FOUND, "transactions not found")
+        );
+
+        // cek apakah sudah terbayarkan
+        if (transaction.getPaymentStatus() == PaymentStatus.paid) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "transaction already paid"
+            );
+        }
+
+        // cek apakah transaksi sudah dibatalkan
+        if (transaction.getPaymentStatus() == PaymentStatus.cancelled) {
+            throw new ResponseStatusException(
+                    HttpStatus.CONFLICT,
+                    "transaction already cancelled"
+            );
+        }
+
+        // masih bingung
+//        if (request.getPaymentStatus() != PaymentStatus.paid) {
+//            throw new ResponseStatusException(
+//                    HttpStatus.BAD_REQUEST,
+//                    "admin can only confirm payment to PAID"
+//            );
+//        }
+
+        transaction.setPaymentStatus(request.getPaymentStatus());
+//        transactionRepository.save(transaction);
+
+        return TransactionResponse.builder()
+                .id(transaction.getId())
+                .userId(transaction.getUser().getId())
+                .room(
+                        RoomResponse.builder()
+                                .id(transaction.getRoom().getId())
+                                .title(transaction.getRoom().getTitle())
+                                .availability(transaction.getRoom().getAvailability())
+                                .details(transaction.getRoom().getDetails())
+                                .price(transaction.getRoom().getPrice())
                                 .build()
                 )
                 .amount(transaction.getAmount())
