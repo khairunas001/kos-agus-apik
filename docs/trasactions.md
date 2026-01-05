@@ -45,14 +45,14 @@
 
 ```
 
-### 2. Update Transaction (Transaction confirmation) ✅❌
+### 2. Update Transaction (Transaction confirmation) ✅ -kurang testing❌
 
 **`PATCH /kos-agus/transactions/update/{transactions_id}`**
 
 ### Request Header
 - `X-KOS-AGUS-API-TOKEN`: Token aktif (Mandatory)
 - Role = `admin` (Mandatory)
-- update "payment_status": menjadi "success" dan update room_availability menjadi "booked"
+- update "payment_status": menjadi "paid" dan update room_availability menjadi "booked"
 - update "payment_status": menjadi "canceled" dan room_availability menjadi "available"
 
 📥 Request Body:
@@ -81,14 +81,14 @@
     "amount": 1000000,
     "period": "2025-12-10 16:32:55",
     "payment_date": "2025-12-09 16:32:55",
-    "payment_status": "success",
+    "payment_status": "paid",
     "payment_method": "cash"
   }
 }
 
 ```
 
-### 2. get Room ✅❌
+### 3. get Transaction ✅❌
 
 **`GET /kos-agus/transactions`**
 

@@ -78,16 +78,16 @@ public class TransactionService {
         transaction.setPaymentMethod(request.getPaymentMethod());
         transactionRepository.save(transaction);
 
-        // update room availibility menjadi di booked
-        room.setAvailability(AvailabilityRoom.booked);
+//        // update room availibility menjadi di booked
+//        room.setAvailability(AvailabilityRoom.booked);
+//        roomRepository.save(room);
 
         return TransactionResponse.builder()
                 .id(transaction.getId())
                 .userId(transaction.getUser().getId())
-//                .roomId(transaction.getRoom().getId())
                 .room(
                         RoomResponse.builder()
-                                .id(room.getId())          // 🔥 key = roomId
+                                .id(room.getId())
                                 .title(room.getTitle())
                                 .availability(room.getAvailability())
                                 .details(room.getDetails())
@@ -136,6 +136,14 @@ public class TransactionService {
             );
         }
 
+        if (request.getPaymentStatus() == PaymentStatus.pending) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "admin can only confirm payment to PAID or CANCELED"
+            );
+        }
+
+
         // masih bingung
 //        if (request.getPaymentStatus() != PaymentStatus.paid) {
 //            throw new ResponseStatusException(
@@ -144,8 +152,21 @@ public class TransactionService {
 //            );
 //        }
 
+
+        Room room = transaction.getRoom();
+
+        if (request.getPaymentStatus() == PaymentStatus.paid) {
+            room.setAvailability(AvailabilityRoom.booked);
+        }
+
+        if (request.getPaymentStatus() == PaymentStatus.cancelled) {
+            room.setAvailability(AvailabilityRoom.available);
+        }
+
+        roomRepository.save(room);
+
         transaction.setPaymentStatus(request.getPaymentStatus());
-//        transactionRepository.save(transaction);
+        transactionRepository.save(transaction);
 
         return TransactionResponse.builder()
                 .id(transaction.getId())
