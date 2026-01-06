@@ -45,7 +45,7 @@
 
 ```
 
-### 2. Update Transaction (Transaction confirmation) ✅ -kurang testing❌
+### 2. Update Transaction (Transaction confirmation) ✅ 
 
 **`PATCH /kos-agus/transactions/update/{transactions_id}`**
 
@@ -88,7 +88,7 @@
 
 ```
 
-### 3. get Transaction ✅❌
+### 3. get All Transaction ✅ -kurang testing❌
 
 **`GET /kos-agus/transactions`**
 
@@ -105,21 +105,85 @@
     {
       "transactions_id" : "transactions 1",
       "user_id": "user 1",
-      "room_id": "kamar 1",
+      "room": {
+        "id": "63f63277-5854-49ed-8c07-9bba15b9c304",
+        "title": "kamar 9999",
+        "availability": "booked",
+        "details": "kamar mandi dalam",
+        "price": 1000000
+      },
       "amount": 1000000,
       "period": "2025-12-10 16:32:55",
       "payment_date": "2025-12-09 16:32:55",
-      "payment_status": "success",
+      "payment_status": "paid",
       "payment_method": "cash"
     },
     {
       "transactions_id" : "transactions 2",
-      "user_id": "user 1",
-      "room_id": "kamar 1",
+      "user_id": "user 2",
+      "room": {
+        "id": "asdasdasd",
+        "title": "kamar 9999",
+        "availability": "booked",
+        "details": "kamar mandi luar",
+        "price": 1000000
+      },
       "amount": 1000000,
       "period": "2025-12-10 16:32:55",
       "payment_date": "2025-12-09 16:32:55",
-      "payment_status": "success",
+      "payment_status": "paid",
+      "payment_method": "cash"
+    }
+  ]
+}
+
+```
+
+
+### 4. get All Transaction Base user who have it ✅ -kurang testing❌
+
+**`GET /kos-agus/transactions`**
+
+### Request Header
+- `X-KOS-AGUS-API-TOKEN`: Token aktif (Mandatory)
+-
+
+📄 Response (201 Created):
+
+```json
+{
+  "status": "200 OK",
+  "data": [
+    {
+      "transactions_id" : "transactions 1",
+      "user_id": "user 77",
+      "room": {
+        "id": "63f63277-5854-49ed-8c07-9bba15b9c304",
+        "title": "kamar 9999",
+        "availability": "booked",
+        "details": "kamar mandi dalam",
+        "price": 1000000
+      },
+      "amount": 1000000,
+      "period": "2025-12-10 16:32:55",
+      "payment_date": "2025-12-09 16:32:55",
+      "payment_status": "paid",
+      "payment_method": "cash"
+    },
+    {
+      "transactions_id" : "transactions 2",
+      "user_id": "user 77",
+      "room": {
+        "id": "asdasdasd",
+        "title": "kamar 9999",
+        "availability": "booked",
+        "details": "kamar mandi luar",
+        "price": 1000000
+      },
+      "amount": 1000000,
+      "period": "2025-12-10 16:32:55",
+      "payment_date": "2025-12-09 16:32:55",
+      "payment_status": "paid",
       "payment_method": "cash"
     }
   ]

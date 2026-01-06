@@ -12,6 +12,8 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 public class TransactionController {
 
@@ -41,6 +43,17 @@ public class TransactionController {
     private ResponseEntity<WebResponseSuccess<TransactionResponse>> updatePaymentConfirmation(User user, @PathVariable("transactions_id") String transactionsId, @RequestBody UpdatePaymentConfirmationRequest request) {
 
         TransactionResponse transactionResponse = transactionService.updateTransactionConfirmation(user, request, transactionsId);
+
+        return ResponseFactory.ok(transactionResponse);
+    }
+
+    @GetMapping(
+            path = "/kos-agus/transactions",
+            produces = MediaType.APPLICATION_JSON_VALUE
+    )
+    private ResponseEntity<WebResponseSuccess<List<TransactionResponse>>> getAllTransactions(User user) {
+
+        List<TransactionResponse> transactionResponse = transactionService.getAllTransactions(user);
 
         return ResponseFactory.ok(transactionResponse);
     }

@@ -29,6 +29,7 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -353,6 +354,30 @@ class TransactionControllerTest {
             System.out.println(response);
         });
 
+    }
+
+    @Test
+    void getAllTransactions() throws Exception {
+
+        mockMvc.perform(
+                get("/kos-agus/transactions")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .header(
+                                "API-TOKEN-KOS-AGUS-APIK",
+                                "@anas_token_room"
+                        )
+        ).andExpectAll(
+                status().isOk()
+        ).andDo(result -> {
+            WebResponse<List<TransactionResponse>> response = objectMapper.readValue(
+                    result.getResponse().getContentAsString(),
+                    new TypeReference<>() {
+                    });
+
+            assertInstanceOf(List.class, response.getData());
+
+            System.out.println(response.getData());
+        });
     }
 
 }
