@@ -349,7 +349,7 @@ class TransactionControllerTest {
                     });
 
             assertNotNull(response.getErrors());
-            assertEquals("admin can only confirm payment to PAID or CANCELED",response.getErrors());
+            assertEquals("admin can only confirm payment to PAID or CANCELED", response.getErrors());
 
             System.out.println(response);
         });
@@ -378,6 +378,77 @@ class TransactionControllerTest {
 
             System.out.println(response.getData());
         });
+    }
+
+    @Test
+    void getAllTransactionsFailed() throws Exception {
+
+        mockMvc.perform(
+                get("/kos-agus/transactions")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .header(
+                                "API-TOKEN-KOS-AGUS-APIK",
+                                "token-salah"
+                        )
+        ).andExpectAll(
+                status().isUnauthorized()
+        ).andDo(result -> {
+            WebResponse<List<TransactionResponse>> response = objectMapper.readValue(
+                    result.getResponse().getContentAsString(),
+                    new TypeReference<>() {
+                    });
+
+            assertNotNull(response.getErrors());
+
+            System.out.println(response);
+        });
+    }
+
+    @Test
+    void getAllTransactionsHistories() throws Exception {
+
+        //use helper functions
+        createTransactions("kamar 1");
+        createTransactions("kamar 90");
+
+        mockMvc.perform(
+                get("/kos-agus/transactions/histories")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .header(
+                                "API-TOKEN-KOS-AGUS-APIK",
+                                "@anas_token_room_costumers"
+                        )
+        ).andExpectAll(
+                status().isOk()
+        ).andDo(result -> {
+            WebResponse<List<TransactionResponse>> response = objectMapper.readValue(
+                    result.getResponse().getContentAsString(),
+                    new TypeReference<>() {
+                    });
+
+            assertInstanceOf(List.class, response.getData());
+
+            System.out.println(response.getData());
+        });
+    }
+
+    // helper class
+    private void createTransactions(String roomId) throws Exception {
+
+        CreateTransactionsRequest request = new CreateTransactionsRequest();
+        request.setRoomId(roomId);
+        request.setDurationMonth(5);
+        request.setPaymentMethod("cash");
+
+        mockMvc.perform(post("/kos-agus/transactions/create")
+                .accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request))
+                .header(
+                        "API-TOKEN-KOS-AGUS-APIK",
+                        "@anas_token_room_costumers"
+                )
+        ).andExpect(status().isCreated());
     }
 
 }

@@ -57,4 +57,15 @@ public class TransactionController {
 
         return ResponseFactory.ok(transactionResponse);
     }
+
+    @GetMapping(
+            path = "/kos-agus/transactions/histories",
+            produces = MediaType.APPLICATION_JSON_VALUE
+    )
+    private ResponseEntity<WebResponseSuccess<List<TransactionResponse>>> getAllTransactionHistories(User user){
+
+        List<TransactionResponse> transactionResponses = transactionService.getAllTransactionByUserId(user);
+
+        return ResponseFactory.ok(transactionResponses);
+    }
 }

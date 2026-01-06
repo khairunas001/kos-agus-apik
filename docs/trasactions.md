@@ -88,7 +88,7 @@
 
 ```
 
-### 3. get All Transaction ✅ -kurang testing❌
+### 3. get All Transaction ✅ 
 
 **`GET /kos-agus/transactions`**
 
@@ -142,7 +142,7 @@
 
 ### 4. get All Transaction Base user who have it ✅ -kurang testing❌
 
-**`GET /kos-agus/transactions`**
+**`GET /kos-agus/transactions/histories`**
 
 ### Request Header
 - `X-KOS-AGUS-API-TOKEN`: Token aktif (Mandatory)

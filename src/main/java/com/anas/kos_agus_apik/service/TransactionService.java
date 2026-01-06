@@ -217,5 +217,34 @@ public class TransactionService {
                 .toList();
     }
 
+    @Transactional
+    public List<TransactionResponse> getAllTransactionByUserId(User user){
+
+        List<Transaction> transactions = transactionRepository.findByUserId(user.getId());
+
+        return transactions.stream()
+                .map(transaction -> TransactionResponse.builder()
+                        .id(transaction.getId())
+                        .userId(transaction.getUser().getId())
+                        .room(
+                                RoomResponse.builder()
+                                        .id(transaction.getRoom().getId())
+                                        .title(transaction.getRoom().getTitle())
+                                        .availability(transaction.getRoom().getAvailability())
+                                        .details(transaction.getRoom().getDetails())
+                                        .price(transaction.getRoom().getPrice())
+                                        .build()
+                        )
+                        .amount(transaction.getAmount())
+                        .period(transaction.getPeriod())
+                        .paymentDate(transaction.getPaymentDate())
+                        .paymentStatus(transaction.getPaymentStatus())
+                        .paymentMethod(transaction.getPaymentMethod())
+                        .build()
+                )
+                .toList();
+
+    }
+
 
 }
