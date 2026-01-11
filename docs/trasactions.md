@@ -140,7 +140,7 @@
 ```
 
 
-### 4. get All Transaction Base user who have it ✅ -kurang testing❌
+### 4. get All Transaction Base user who have it ✅ -kurang testing❌ finish
 
 **`GET /kos-agus/transactions/histories`**
 
